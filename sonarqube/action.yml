@@ -1,0 +1,50 @@
+name: SonarQub
+description: "Run sonarQube analisys"
+
+inputs:
+  sonarqube_key:
+    description: "Key for SonarQube"
+    required: true
+  sonarqube_url:
+    description: "URL for sonar server"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Java 11
+      uses: actions/setup-java@v3
+      with:
+        distribution: "temurin"
+        java-version: "11.x"
+
+    - name: Setup sonar-scanner
+      uses: warchant/setup-sonar-scanner@v4
+
+    - name: Test coverage cache
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-test-reporter
+      with:
+        path: |
+          ./test-reporter.xml
+          ./coverage
+        key: ${{ runner.os }}-build-${{ github.sha }}
+
+    - name: SonarQube
+      shell: bash
+      run: sonar-scanner
+        -Dsonar.host.url=${{ inputs.sonarqube_url }}
+        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+        -Dsonar.login=${{ inputs.sonarqube_key }}
+        -Dsonar.projectKey=${{ github.event.repository.name }}
+        -Dsonar.sources=src
+        -Dsonar.tests=test
+        -Dsonar.test.inclusions='test/**/*.test.ts'
+        -Dsonar.coverage.exclusions='src/main.ts,**/*.test.ts,**/*index.ts,**/*.module.ts,src/**/database/migration/*.ts,src/**/database/seed/*.ts,src/**/dto/*.ts,**/interceptor/*.ts,src/newrelic.ts,src/**/entity/*.ts'
+        -Dsonar.cpd.exclusions='**/*.test.ts,src/**/dto/*.ts,src/**/database/migration/*.ts,src/**/entity/*.ts'
+        -Dsonar.testExecutionReportPaths=test-reporter.xml
+        -Dsonar.pullrequest.key=${{ github.event.number }}
+        -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }}
+        -Dsonar.pullrequest.base=develop
+        -Dsonar.scm.revision=${{ github.event.pull_request.head.sha }}
