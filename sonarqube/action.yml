@@ -1,16 +1,16 @@
-name: SonarQub
-description: "Run sonarQube analisys"
+name: SonarQube
+description: 'Run sonarQube analisys'
 
 inputs:
   sonarqube_key:
-    description: "Key for SonarQube"
+    description: 'Key for SonarQube'
     required: true
   sonarqube_url:
-    description: "URL for sonar server"
+    description: 'URL for sonar server'
     required: true
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Checkout repo
       uses: actions/checkout@v3
@@ -18,8 +18,8 @@ runs:
     - name: Setup Java 11
       uses: actions/setup-java@v3
       with:
-        distribution: "temurin"
-        java-version: "11.x"
+        distribution: 'temurin'
+        java-version: '11.x'
 
     - name: Setup sonar-scanner
       uses: warchant/setup-sonar-scanner@v4
