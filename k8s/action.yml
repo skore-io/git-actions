@@ -1,0 +1,90 @@
+name: K8s
+description: Run deploy for kubernetes
+
+inputs:
+  ecr_repository:
+    description: Key for repository on k8s
+    required: true
+  k8s_credential:
+    description: Credential for k8s project
+    required: true
+  service_base_url:
+    description: URL for k8s project
+    required: true
+  github_token:
+    description: Token for Github project
+    required: true
+  aws_access_key_id:
+    description: AWS access key
+    required: true
+  aws_secret_access_key:
+    description: AWS secret key
+    required: true
+  tls_secret_name:
+    description: TLS secret name
+    required: true
+  k8s_replicas:
+    description: Number of replicas
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Application cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          ./node_modules
+          ./dist
+          ./k8s
+        key: ${{ runner.os }}-build-${{ github.sha }}
+
+    - name: Retrieve version
+      shell: bash
+      run: echo "RELEASE=$(cat package.json|jq -r '.version')" >> $GITHUB_ENV
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1-node16
+      with:
+        aws-access-key-id: ${{ inputs.aws_access_key_id }}
+        aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
+        aws-region: us-east-1
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build, tag, and push image to Amazon ECR
+      shell: bash
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      run: |
+        docker build --build-arg GITHUB_TOKEN=${{ inputs.github_token }} -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE .
+        docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE
+
+    - name: Set k8s credentials
+      shell: bash
+      run: echo "${{ inputs.k8s_credential }}" > kube_config
+
+    - name: Build cronjobs
+      shell: bash
+      run: npm run build-cronjobs
+      continue-on-error: true
+
+    - name: Deploy application
+      shell: bash
+      run: |-
+        sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/deployment_web.tpl.yaml
+        sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/deployment_web.tpl.yaml
+        sed -i "s|##APP_URL##|${{ inputs.service_base_url }}|g" .k8s/nginx-ingress.tpl.yaml
+        sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g" .k8s/nginx-ingress.tpl.yaml
+        if test -f ".k8s/*.cronjob.yaml"; then
+          sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/*.cronjob.yaml
+        fi
+        kubectl apply -f .k8s
+      env:
+        KUBECONFIG: kube_config
