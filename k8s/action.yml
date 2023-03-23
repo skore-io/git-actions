@@ -82,7 +82,7 @@ runs:
         sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/deployment_web.tpl.yaml
         sed -i "s|##APP_URL##|${{ inputs.service_base_url }}|g" .k8s/nginx-ingress.tpl.yaml
         sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g" .k8s/nginx-ingress.tpl.yaml
-        if test -f ".k8s/*.cronjob.yaml"; then
+        if [ -n "$(find .k8s -name '*.cronjob.yaml' | head -1)" ]; then
           sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/*.cronjob.yaml
         fi
         kubectl apply -f .k8s

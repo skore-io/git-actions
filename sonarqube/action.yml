@@ -3,14 +3,14 @@ description: 'Run sonarQube analisys'
 
 inputs:
   sonarqube_key:
-    description: 'Key for SonarQube'
+    description: Key for SonarQube
     required: true
   sonarqube_url:
-    description: 'URL for sonar server'
+    description: URL for sonar server
     required: true
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
     - name: Checkout repo
       uses: actions/checkout@v3
