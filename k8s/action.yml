@@ -26,6 +26,12 @@ inputs:
   k8s_replicas:
     description: Number of replicas
     required: true
+  subnets:
+    description: List of subnets separated by comma
+    required: false
+  certificate_arn:
+    description: Certificate arn
+    required: false
 
 runs:
   using: composite
@@ -82,9 +88,19 @@ runs:
         sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/deployment_web.tpl.yaml
         sed -i "s|##APP_URL##|${{ inputs.service_base_url }}|g" .k8s/nginx-ingress.tpl.yaml
         sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g" .k8s/nginx-ingress.tpl.yaml
+
+        if [ "${{ inputs.certificate_arn }}" != '' ]; then
+          sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/nginx-ingress.tpl.yaml
+        fi
+
+        if [ "${{ inputs.subnets }}" != '' ]; then
+          sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/nginx-ingress.tpl.yaml
+        fi
+
         if [ -n "$(find .k8s -name '*.cronjob.yaml' | head -1)" ]; then
           sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/*.cronjob.yaml
         fi
+
         kubectl apply -f .k8s
       env:
         KUBECONFIG: kube_config
