@@ -25,7 +25,8 @@ inputs:
     required: true
   k8s_replicas:
     description: Number of replicas
-    required: true
+    required: false
+    default: 1
   subnets:
     description: List of subnets separated by comma
     required: false
@@ -51,9 +52,15 @@ runs:
           ./k8s
         key: ${{ runner.os }}-build-${{ github.sha }}
 
-    - name: Retrieve version
+    - name: Get release version
+      id: latest-tag
+      uses: 'WyriHaximus/github-action-get-previous-tag@v1'
+      with:
+        fallback: 1.0.0
+
+    - name: Set release version
       shell: bash
-      run: echo "RELEASE=$(cat package.json|jq -r '.version')" >> $GITHUB_ENV
+      run: echo "RELEASE=${{ steps.latest-tag.outputs.tag }}" >> $GITHUB_ENV
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1-node16
