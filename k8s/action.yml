@@ -56,7 +56,7 @@ runs:
       shell: bash
       run: npm ci
       env:
-        GITHUB_TOKEN: ${{ secrets.github_token }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
 
     - name: Get release version
       id: latest-tag
