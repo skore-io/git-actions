@@ -52,6 +52,10 @@ runs:
           ./k8s
         key: ${{ runner.os }}-build-${{ github.sha }}
 
+    - name: Dependencies
+      shell: bash
+      run: npm ci
+
     - name: Get release version
       id: latest-tag
       uses: 'WyriHaximus/github-action-get-previous-tag@v1'
