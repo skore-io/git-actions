@@ -33,6 +33,9 @@ inputs:
   certificate_arn:
     description: Certificate arn
     required: false
+  release_version:
+    description: Release version
+    required: false
 
 runs:
   using: composite
@@ -60,7 +63,7 @@ runs:
 
     - name: Set release version
       shell: bash
-      run: echo "RELEASE=${{ steps.latest-tag.outputs.tag }}" >> $GITHUB_ENV
+      run: echo "RELEASE=${{ inputs.release_version || steps.latest-tag.outputs.tag }}" >> $GITHUB_ENV
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1-node16
