@@ -76,13 +76,19 @@ runs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
+    - name: Get timestamp
+      shell: bash
+      id: timestamp
+      run: echo "::set-output name=timestamp::$(date +%s)"
+
     - name: Build, tag, and push image to Amazon ECR
       shell: bash
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        TIMESTAMP: ${{ steps.timestamp.outputs.timestamp }}
       run: |
-        docker build --build-arg GITHUB_TOKEN=${{ inputs.github_token }} -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE .
-        docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE
+        docker build --build-arg GITHUB_TOKEN=${{ inputs.github_token }} -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE-$TIMESTAMP .
+        docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE-$TIMESTAMP
 
     - name: Set k8s credentials
       shell: bash
