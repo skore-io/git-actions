@@ -76,13 +76,19 @@ runs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
+    - name: Set timestamp
+      shell: bash
+      run: |
+        TIMESTAMP=$(date +%Y-%m-%d-%H-%M-%S)
+        echo "TIMESTAMP=${TIMESTAMP}" >> $GITHUB_ENV
+
     - name: Build, tag, and push image to Amazon ECR
       shell: bash
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
-        docker build --build-arg GITHUB_TOKEN=${{ inputs.github_token }} -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE .
-        docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE
+        docker build --build-arg GITHUB_TOKEN=${{ inputs.github_token }} -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE-$TIMESTAMP .
+        docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE-$TIMESTAMP
 
     - name: Set k8s credentials
       shell: bash
@@ -96,7 +102,7 @@ runs:
     - name: Deploy application
       shell: bash
       run: |-
-        sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/deployment_web.tpl.yaml
+        sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE-$TIMESTAMP|g" .k8s/deployment_web.tpl.yaml
         sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/deployment_web.tpl.yaml
         sed -i "s|##APP_URL##|${{ inputs.service_base_url }}|g" .k8s/nginx-ingress.tpl.yaml
         sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g" .k8s/nginx-ingress.tpl.yaml
@@ -110,7 +116,7 @@ runs:
         fi
 
         if [ -n "$(find .k8s -name '*.cronjob.yaml' | head -1)" ]; then
-          sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/*.cronjob.yaml
+          sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE-$TIMESTAMP|g" .k8s/*.cronjob.yaml
         fi
 
         kubectl apply --force -f .k8s
