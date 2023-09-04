@@ -11,6 +11,9 @@ inputs:
   service_base_url:
     description: URL for k8s project
     required: true
+  service_async_base_url:
+    description: URL async for k8s project
+    required: false
   github_token:
     description: Token for Github project
     required: true
@@ -118,6 +121,16 @@ runs:
 
         if [ -n "$(find .k8s -name '*.cronjob.yaml' | head -1)" ]; then
           sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/*.cronjob.yaml
+        fi
+
+        if [ -n "$(find .k8s -name 'work-nginx-ingress.tpl.yaml' | head -1)" ]; then
+            sed -i "s|##APP_URL##|${{ inputs.service_async_base_url }}|g" .k8s/work-nginx-ingress.tpl.yaml
+        fi
+
+        if [ -n "$(find .k8s -name 'work-deployment.tpl.yaml' | head -1)" ]; then
+            sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/work-deployment.tpl.yaml
+            sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/work-deployment.tpl.yaml
+            sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/work-deployment.tpl.yaml
         fi
 
         kubectl apply -f .k8s --force
