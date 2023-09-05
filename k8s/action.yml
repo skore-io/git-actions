@@ -127,6 +127,7 @@ runs:
             sed -i "s|##APP_URL##|${{ inputs.service_async_base_url }}|g" .k8s/worker-nginx-ingress.tpl.yaml
             sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g"  .k8s/worker-nginx-ingress.tpl.yaml
             sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/worker-nginx-ingress.tpl.yaml
+            sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/worker-nginx-ingress.tpl.yaml  
         fi
 
         if [ -n "$(find .k8s -name 'worker-deployment.tpl.yaml' | head -1)" ]; then
