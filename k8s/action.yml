@@ -136,6 +136,11 @@ runs:
             sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/worker-deployment.tpl.yaml
         fi
 
+        if [ -n "$(find .k8s -name 'deployment_proxy.tpl.yaml' | head -1)" ]; then
+            sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/deployment_proxy.tpl.yaml
+            sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/deployment_proxy.tpl.yaml
+        fi
+
         kubectl apply -f .k8s --force
       env:
         KUBECONFIG: kube_config
