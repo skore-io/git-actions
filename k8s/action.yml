@@ -139,7 +139,6 @@ runs:
 
         if [ -n "$(find .k8s -name 'console-ingress.tpl' | head -1)" ]; then
             sed -i "s|##APP_CONSOLE_URL##|${{ inputs.service_console_base_url }}|g" .k8s/console-ingress.yaml
-            sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g"  .k8s/console-ingress.yaml
             sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/console-ingress.yaml
             sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/console-ingress.yaml  
         fi
