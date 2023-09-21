@@ -136,6 +136,14 @@ runs:
             sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/worker-deployment.tpl.yaml
         fi
 
+
+        if [ -n "$(find .k8s -name 'console-ingress.tpl' | head -1)" ]; then
+            sed -i "s|##APP_CONSOLE_URL##|${{ inputs.service_console_base_url }}|g" .k8s/console-ingress.yaml
+            sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g"  .k8s/console-ingress.yaml
+            sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/console-ingress.yaml
+            sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/console-ingress.yaml  
+        fi
+
         if [ -n "$(find .k8s -name 'deployment_proxy.tpl.yaml' | head -1)" ]; then
             sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/deployment_proxy.tpl.yaml
             sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/deployment_proxy.tpl.yaml
