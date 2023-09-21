@@ -138,9 +138,9 @@ runs:
 
 
         if [ -n "$(find .k8s -name 'console-ingress.tpl.yaml' | head -1)" ]; then
-            sed -i "s|##APP_CONSOLE_URL##|${{ inputs.service_console_base_url }}|g" .k8s/console-ingress.yaml
-            sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/console-ingress.yaml
-            sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/console-ingress.yaml  
+            sed -i "s|##APP_CONSOLE_URL##|${{ inputs.service_console_base_url }}|g" .k8s/console-ingress.tpl.yaml
+            sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/console-ingress.tpl.yaml
+            sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/console-ingress.tpl.yaml  
         fi
 
         if [ -n "$(find .k8s -name 'deployment_proxy.tpl.yaml' | head -1)" ]; then
