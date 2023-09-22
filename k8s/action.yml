@@ -116,21 +116,23 @@ runs:
 
         if [ "${{ inputs.need_affinity }}" == 'true' ]; then
         echo '      affinity:
-                        nodeAffinity:
-                          requiredDuringSchedulingIgnoredDuringExecution:
-                            nodeSelectorTerms:
-                              - matchExpressions:
-                                  - key: nodegp
-                                    operator: In
-                                    values:
-                                      - ng02
-                        tolerations:
-                          - effect: NoSchedule
-                            key: nodegroup
-                            operator: Equal
-                            value: ng02' > temp.yaml
-        sed -i '/##AFFINITY_AND_TOLERATIONS##/r temp.yaml' .k8s/deployment_web.tpl.yaml
-        rm temp.yaml
+        nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: nodegp
+                      operator: In
+                      values:
+                        - ng02' > affinity.yaml
+        echo '      tolerations:
+            - effect: NoSchedule
+              key: nodegroup
+              operator: Equal
+              value: ng02' > tolerations.yaml
+        sed -i '/##AFFINITY##/r affinity.yaml' .k8s/deployment_web.tpl.yaml
+        sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/deployment_web.tpl.yaml
+        rm affinity.yaml
+        rm tolerations.yaml
         fi
 
         if [ "${{ inputs.certificate_arn }}" != '' ]; then
