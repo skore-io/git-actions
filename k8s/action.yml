@@ -39,6 +39,9 @@ inputs:
   release_version:
     description: Release version
     required: false
+  need_affinity:
+    description: Need affinity
+    required: false
 
 runs:
   using: composite
@@ -111,7 +114,7 @@ runs:
         sed -i "s|##APP_URL##|${{ inputs.service_base_url }}|g" .k8s/nginx-ingress.tpl.yaml
         sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g" .k8s/nginx-ingress.tpl.yaml
 
-        if [ "${{ inputs.is_affinity }}" != '' ]; then
+        if [ "${{ inputs.need_affinity }}" != '' ]; then
         echo '      affinity:
                         nodeAffinity:
                           requiredDuringSchedulingIgnoredDuringExecution:
