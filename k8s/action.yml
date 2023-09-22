@@ -111,6 +111,25 @@ runs:
         sed -i "s|##APP_URL##|${{ inputs.service_base_url }}|g" .k8s/nginx-ingress.tpl.yaml
         sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g" .k8s/nginx-ingress.tpl.yaml
 
+        if [ "${{ inputs.is_affinity }}" != '' ]; then
+        echo '      affinity:
+                        nodeAffinity:
+                          requiredDuringSchedulingIgnoredDuringExecution:
+                            nodeSelectorTerms:
+                              - matchExpressions:
+                                  - key: nodegp
+                                    operator: In
+                                    values:
+                                      - ng02
+                        tolerations:
+                          - effect: NoSchedule
+                            key: nodegroup
+                            operator: Equal
+                            value: ng02' > temp.yaml
+        sed -i '/##AFFINITY_AND_TOLERATIONS##/r temp.yaml' .k8s/deployment_web.tpl.yaml
+        rm temp.yaml
+        fi
+
         if [ "${{ inputs.certificate_arn }}" != '' ]; then
           sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/nginx-ingress.tpl.yaml
         fi
