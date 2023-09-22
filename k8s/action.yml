@@ -131,7 +131,6 @@ runs:
                         value: ng02' > tolerations.yaml
         sed -i '/##AFFINITY##/r affinity.yaml' .k8s/deployment_web.tpl.yaml
         sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/deployment_web.tpl.yaml
-        cat .k8s/deployment_web.tpl.yaml
         rm affinity.yaml
         rm tolerations.yaml
         fi
