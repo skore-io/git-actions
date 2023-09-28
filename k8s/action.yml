@@ -230,6 +230,22 @@ runs:
           sed -i "s|##REQUEST_MEMORY##|${{ inputs.worker_request_memory }}|g" .k8s/worker-deployment.tpl.yaml
         fi
 
+        if [ "${{ inputs.proxy_limit_cpu }}" != '' ]; then
+          sed -i "s|##LIMIT_CPU##|${{ inputs.proxy_limit_cpu }}|g" .k8s/deployment_proxy.tpl.yaml
+        fi
+
+        if [ "${{ inputs.proxy_limit_memory }}" != '' ]; then
+          sed -i "s|##LIMIT_MEMORY##|${{ inputs.proxy_limit_memory }}|g" .k8s/deployment_proxy.tpl.yaml
+        fi
+
+        if [ "${{ inputs.proxy_request_cpu }}" != '' ]; then
+          sed -i "s|##REQUEST_CPU##|${{ inputs.proxy_request_cpu }}|g" .k8s/deployment_proxy.tpl.yaml
+        fi
+
+        if [ "${{ inputs.proxy_request_memory }}" != '' ]; then
+          sed -i "s|##REQUEST_MEMORY##|${{ inputs.proxy_request_memory }}|g" .k8s/deployment_proxy.tpl.yaml
+        fi
+
         kubectl apply -f .k8s --force
       env:
         KUBECONFIG: kube_config
