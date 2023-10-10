@@ -48,7 +48,7 @@ runs:
         path: |
           ./test-reporter.xml
           ./coverage
-        key: ${{ runner.os }}-test-${{ steps.comment-branch.outputs.head_sha }}
+        key: ${{ runner.os }}-build-${{ steps.comment-branch.outputs.head_sha }}
 
     - name: SonarQube
       shell: bash
