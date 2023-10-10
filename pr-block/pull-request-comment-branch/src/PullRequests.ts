@@ -1,44 +1,43 @@
-import { context, getOctokit } from "@actions/github";
+import { context, getOctokit } from '@actions/github'
 
 interface PullRequestDetailsResponse {
   repository: {
     pullRequest: {
       headRef: {
-        name: string;
+        name: string
         target: {
-          oid: string;
-        };
-      };
+          oid: string
+        }
+      }
       baseRef: {
-        name: string;
+        name: string
         target: {
-          oid: string;
-        };
-      };
-    };
-  };
+          oid: string
+        }
+      }
+    }
+  }
 }
 
 export async function isPullRequest(token: string) {
-  const client = getOctokit(token);
+  const client = getOctokit(token)
 
-  const { data: { pull_request } } = await client.rest.issues.get({
+  const {
+    data: { pull_request },
+  } = await client.rest.issues.get({
     ...context.repo,
     issue_number: context.issue.number,
-  });
+  })
 
-  return !!pull_request;
+  return !!pull_request
 }
 
 export async function pullRequestDetails(token: string) {
-  const client = getOctokit(token);
+  const client = getOctokit(token)
 
   const {
     repository: {
-      pullRequest: {
-        baseRef,
-        headRef,
-      },
+      pullRequest: { baseRef, headRef },
     },
   } = await client.graphql<PullRequestDetailsResponse>(
     `
@@ -63,14 +62,15 @@ export async function pullRequestDetails(token: string) {
     `,
     {
       ...context.repo,
-      number: context.issue.number
+      number: context.issue.number,
     },
-  );
+  )
 
   return {
     base_ref: baseRef.name,
     base_sha: baseRef.target.oid,
     head_ref: headRef.name,
     head_sha: headRef.target.oid,
-  };
+    number: context.issue.number,
+  }
 }

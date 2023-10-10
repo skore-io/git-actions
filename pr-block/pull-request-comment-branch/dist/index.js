@@ -9517,7 +9517,7 @@ exports.pullRequestDetails = exports.isPullRequest = void 0;
 const github_1 = __nccwpck_require__(5438);
 async function isPullRequest(token) {
     const client = (0, github_1.getOctokit)(token);
-    const { data: { pull_request } } = await client.rest.issues.get({
+    const { data: { pull_request }, } = await client.rest.issues.get({
         ...github_1.context.repo,
         issue_number: github_1.context.issue.number,
     });
@@ -9526,7 +9526,7 @@ async function isPullRequest(token) {
 exports.isPullRequest = isPullRequest;
 async function pullRequestDetails(token) {
     const client = (0, github_1.getOctokit)(token);
-    const { repository: { pullRequest: { baseRef, headRef, }, }, } = await client.graphql(`
+    const { repository: { pullRequest: { baseRef, headRef }, }, } = await client.graphql(`
       query pullRequestDetails($repo:String!, $owner:String!, $number:Int!) {
         repository(name: $repo, owner: $owner) {
           pullRequest(number: $number) {
@@ -9547,13 +9547,14 @@ async function pullRequestDetails(token) {
       }
     `, {
         ...github_1.context.repo,
-        number: github_1.context.issue.number
+        number: github_1.context.issue.number,
     });
     return {
         base_ref: baseRef.name,
         base_sha: baseRef.target.oid,
         head_ref: headRef.name,
         head_sha: headRef.target.oid,
+        number: github_1.context.issue.number,
     };
 }
 exports.pullRequestDetails = pullRequestDetails;
@@ -9747,15 +9748,16 @@ const core_1 = __nccwpck_require__(2186);
 const PullRequests_1 = __nccwpck_require__(8465);
 async function run() {
     try {
-        const token = (0, core_1.getInput)("repo_token", { required: true });
+        const token = (0, core_1.getInput)('repo_token', { required: true });
         if (!(0, PullRequests_1.isPullRequest)(token)) {
-            throw Error("Comment is not on a pull request");
+            throw Error('Comment is not on a pull request');
         }
-        const { base_ref, base_sha, head_ref, head_sha, } = await (0, PullRequests_1.pullRequestDetails)(token);
-        (0, core_1.setOutput)("base_ref", base_ref);
-        (0, core_1.setOutput)("base_sha", base_sha);
-        (0, core_1.setOutput)("head_ref", head_ref);
-        (0, core_1.setOutput)("head_sha", head_sha);
+        const { base_ref, base_sha, head_ref, head_sha, number } = await (0, PullRequests_1.pullRequestDetails)(token);
+        (0, core_1.setOutput)('base_ref', base_ref);
+        (0, core_1.setOutput)('base_sha', base_sha);
+        (0, core_1.setOutput)('head_ref', head_ref);
+        (0, core_1.setOutput)('head_sha', head_sha);
+        (0, core_1.setOutput)('number', number);
     }
     catch (error) {
         if (error instanceof Error) {

@@ -63,7 +63,7 @@ runs:
         -Dsonar.coverage.exclusions='src/main.ts,**/*.test.ts,**/*index.ts,**/*.module.ts,src/**/database/migration/*.ts,src/**/database/seed/*.ts,src/**/dto/*.ts,**/interceptor/*.ts,src/newrelic.ts,src/**/entity/*.ts'
         -Dsonar.cpd.exclusions='**/*.test.ts,src/**/dto/*.ts,src/**/database/migration/*.ts,src/**/entity/*.ts'
         -Dsonar.testExecutionReportPaths=test-reporter.xml
-        -Dsonar.pullrequest.key=${{ github.event.number }}
-        -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }}
+        -Dsonar.pullrequest.key=${{ steps.comment-branch.outputs.number }}
+        -Dsonar.pullrequest.branch=${{ steps.comment-branch.outputs.head_ref }}
         -Dsonar.pullrequest.base=develop
-        -Dsonar.scm.revision=${{ github.event.pull_request.head.sha }}
+        -Dsonar.scm.revision=${{ steps.comment-branch.outputs.head_sha }}
