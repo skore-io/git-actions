@@ -12,8 +12,14 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+    - name: Get branch of PR
+      uses: skore-io/git-actions/pr-block/pull-request-comment-branch@main
+      id: comment-branch
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ steps.comment-branch.outputs.head_sha }}
 
     - name: Setup Java 11
       uses: actions/setup-java@v3
@@ -33,6 +39,16 @@ runs:
           ./test-reporter.xml
           ./coverage
         key: ${{ runner.os }}-build-${{ github.sha }}
+
+    - name: Test coverage cache
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-test-reporter
+      with:
+        path: |
+          ./test-reporter.xml
+          ./coverage
+          key: ${{ runner.os }}-test-${{ steps.comment-branch.outputs.head_sha }}
 
     - name: SonarQube
       shell: bash
