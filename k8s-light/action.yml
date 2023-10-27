@@ -99,7 +99,6 @@ runs:
     - name: Build and push image
       shell: bash
       env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         SCORMCLOUD_APPID: ${{ inputs.scormcloud_appid }}
         SCORMCLOUD_SECRET_KEY: ${{ inputs.scormcloud_secret_key }}
         SCORMCLOUD_TOKEN_POSTBACK: ${{ inputs.scormcloud_token_postback}}}
