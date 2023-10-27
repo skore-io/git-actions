@@ -102,16 +102,19 @@ runs:
         aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
         aws-region: us-east-1
 
-    - name: Build, tag, and push image to Amazon ECR
+    - name: Build and push image
       shell: bash
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        SCORMCLOUD_APPID: ${{ steps.scormcloud_appid }}
-        SCORMCLOUD_SECRET_KEY: ${{ steps.scormcloud_secret_key }}
-        SCORMCLOUD_TOKEN_POSTBACK: ${{ steps.scormcloud_token_postback }}
+        ECR_REPOSITORY: skr2
+        IMAGE_TAG: ${{ github.sha }}
+        SCORMCLOUD_APPID: ${{ inputs.scormcloud_appid }}
+        SCORMCLOUD_SECRET_KEY: ${{ inputs.scormcloud_secret_key }}
+        SCORMCLOUD_TOKEN_POSTBACK: ${{ inputs.scormcloud_token_postback}}}
       run: |
-        docker build --build-arg GITHUB_TOKEN=${{ inputs.github_token }} -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE .
-        docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE
+        docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest || true
+        docker build --cache-from $ECR_REGISTRY/$ECR_REPOSITORY:latest --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
     - name: Set k8s credentials
       shell: bash
