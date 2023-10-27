@@ -89,6 +89,16 @@ runs:
       shell: bash
       run: echo "RELEASE=${{ inputs.release_version || steps.latest-tag.outputs.tag }}" >> $GITHUB_ENV
 
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Set timestamp
+      shell: bash
+      run: |
+        TIMESTAMP=$(date +%s)
+        echo "TIMESTAMP=${TIMESTAMP}" >> $GITHUB_ENV
+
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
