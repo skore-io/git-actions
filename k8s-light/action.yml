@@ -1,0 +1,227 @@
+name: K8s
+description: Run deploy for kubernetes
+
+inputs:
+  ecr_repository:
+    description: Key for repository on k8s
+    required: true
+  k8s_credential:
+    description: Credential for k8s project
+    required: true
+  service_base_url:
+    description: URL for k8s project
+    required: true
+  service_async_base_url:
+    description: URL async for k8s project
+    required: false
+  github_token:
+    description: Token for Github project
+    required: true
+  aws_access_key_id:
+    description: AWS access key
+    required: true
+  aws_secret_access_key:
+    description: AWS secret key
+    required: true
+  tls_secret_name:
+    description: TLS secret name
+    required: true
+  k8s_replicas:
+    description: Number of replicas
+    required: false
+    default: 1
+  subnets:
+    description: List of subnets separated by comma
+    required: false
+  certificate_arn:
+    description: Certificate arn
+    required: false
+  release_version:
+    description: Release version
+    required: false
+  need_affinity:
+    description: Need affinity
+    required: false
+  limit_cpu:
+    description: Limit cpu
+    required: false
+  limit_memory:
+    description: Limit memory
+    required: false
+  request_cpu:
+    description: Request cpu
+    required: false
+  request_memory:
+    description: Request memory
+    required: false
+  worker_limit_cpu:
+    description: Limit cpu for worker
+    required: false
+  worker_limit_memory:
+    description: Limit memory for worker
+    required: false
+  worker_request_cpu:
+    description: Request cpu for worker
+    required: false
+  worker_request_memory:
+    description: Request memory for worker
+    required: false
+
+runs:
+  using: composite
+
+  steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Get release version
+      id: latest-tag
+      uses: 'WyriHaximus/github-action-get-previous-tag@v1'
+      with:
+        fallback: 1.0.0
+
+    - name: Set release version
+      shell: bash
+      run: echo "RELEASE=${{ inputs.release_version || steps.latest-tag.outputs.tag }}" >> $GITHUB_ENV
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1-node16
+      with:
+        aws-access-key-id: ${{ inputs.aws_access_key_id }}
+        aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
+        aws-region: us-east-1
+
+    - name: Build, tag, and push image to Amazon ECR
+      shell: bash
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      run: |
+        docker build --build-arg GITHUB_TOKEN=${{ inputs.github_token }} -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE .
+        docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE
+
+    - name: Set k8s credentials
+      shell: bash
+      run: echo "${{ inputs.k8s_credential }}" > kube_config
+
+    - name: Deploy application
+      shell: bash
+      run: |-
+        sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/deployment_web.tpl.yaml
+        sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/deployment_web.tpl.yaml
+        sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/deployment_web.tpl.yaml
+        sed -i "s|##APP_URL##|${{ inputs.service_base_url }}|g" .k8s/nginx-ingress.tpl.yaml
+        sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g" .k8s/nginx-ingress.tpl.yaml
+
+        if [ "${{ inputs.need_affinity }}" == 'true' ]; then
+        echo '      affinity:
+                      nodeAffinity:
+                          requiredDuringSchedulingIgnoredDuringExecution:
+                            nodeSelectorTerms:
+                              - matchExpressions:
+                                  - key: nodegp
+                                    operator: In
+                                    values:
+                                      - ng02' > affinity.yaml
+        echo '      tolerations:
+                      - effect: NoSchedule
+                        key: nodegroup
+                        operator: Equal
+                        value: ng02' > tolerations.yaml
+        sed -i '/##AFFINITY##/r affinity.yaml' .k8s/deployment_web.tpl.yaml
+        sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/deployment_web.tpl.yaml
+        sed -i "s|##AFFINITY##||g" .k8s/deployment_web.tpl.yaml
+        sed -i "s|##TOLERATION##||g" .k8s/deployment_web.tpl.yaml
+        rm affinity.yaml
+        rm tolerations.yaml
+        fi
+
+        if [ "${{ inputs.certificate_arn }}" != '' ]; then
+          sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/nginx-ingress.tpl.yaml
+        fi
+
+        if [ "${{ inputs.subnets }}" != '' ]; then
+          sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/nginx-ingress.tpl.yaml
+        fi
+
+        if [ -n "$(find .k8s -name '*.cronjob.yaml' | head -1)" ]; then
+          sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/*.cronjob.yaml
+        fi
+
+        if [ -n "$(find .k8s -name 'worker-nginx-ingress.tpl.yaml' | head -1)" ]; then
+            sed -i "s|##APP_URL##|${{ inputs.service_async_base_url }}|g" .k8s/worker-nginx-ingress.tpl.yaml
+            sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g"  .k8s/worker-nginx-ingress.tpl.yaml
+            sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/worker-nginx-ingress.tpl.yaml
+            sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/worker-nginx-ingress.tpl.yaml  
+        fi
+
+        if [ -n "$(find .k8s -name 'worker-deployment.tpl.yaml' | head -1)" ]; then
+            sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/worker-deployment.tpl.yaml
+            sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/worker-deployment.tpl.yaml
+            sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/worker-deployment.tpl.yaml
+        fi
+
+
+        if [ -n "$(find .k8s -name 'console-ingress.tpl.yaml' | head -1)" ]; then
+            sed -i "s|##APP_CONSOLE_URL##|${{ inputs.service_console_base_url }}|g" .k8s/console-ingress.tpl.yaml
+            sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/console-ingress.tpl.yaml
+            sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/console-ingress.tpl.yaml  
+        fi
+
+        if [ -n "$(find .k8s -name 'deployment_proxy.tpl.yaml' | head -1)" ]; then
+            sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/deployment_proxy.tpl.yaml
+            sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/deployment_proxy.tpl.yaml
+        fi
+
+        if [ "${{ inputs.limit_cpu }}" != '' ]; then
+          sed -i "s|##LIMIT_CPU##|${{ inputs.limit_cpu }}|g" .k8s/deployment_web.tpl.yaml
+        fi
+
+        if [ "${{ inputs.limit_memory }}" != '' ]; then
+          sed -i "s|##LIMIT_MEMORY##|${{ inputs.limit_memory }}|g" .k8s/deployment_web.tpl.yaml
+        fi
+
+        if [ "${{ inputs.request_cpu }}" != '' ]; then
+          sed -i "s|##REQUEST_CPU##|${{ inputs.request_cpu }}|g" .k8s/deployment_web.tpl.yaml
+        fi
+
+        if [ "${{ inputs.request_memory }}" != '' ]; then
+          sed -i "s|##REQUEST_MEMORY##|${{ inputs.request_memory }}|g" .k8s/deployment_web.tpl.yaml
+        fi
+
+        if [ "${{ inputs.worker_limit_cpu }}" != '' ]; then
+          sed -i "s|##LIMIT_CPU##|${{ inputs.worker_limit_cpu }}|g" .k8s/worker-deployment.tpl.yaml
+        fi
+
+        if [ "${{ inputs.worker_limit_memory }}" != '' ]; then
+          sed -i "s|##LIMIT_MEMORY##|${{ inputs.worker_limit_memory }}|g" .k8s/worker-deployment.tpl.yaml
+        fi
+
+        if [ "${{ inputs.worker_request_cpu }}" != '' ]; then
+          sed -i "s|##REQUEST_CPU##|${{ inputs.worker_request_cpu }}|g" .k8s/worker-deployment.tpl.yaml
+        fi
+
+        if [ "${{ inputs.worker_request_memory }}" != '' ]; then
+          sed -i "s|##REQUEST_MEMORY##|${{ inputs.worker_request_memory }}|g" .k8s/worker-deployment.tpl.yaml
+        fi
+
+        if [ "${{ inputs.proxy_limit_cpu }}" != '' ]; then
+          sed -i "s|##LIMIT_CPU##|${{ inputs.proxy_limit_cpu }}|g" .k8s/deployment_proxy.tpl.yaml
+        fi
+
+        if [ "${{ inputs.proxy_limit_memory }}" != '' ]; then
+          sed -i "s|##LIMIT_MEMORY##|${{ inputs.proxy_limit_memory }}|g" .k8s/deployment_proxy.tpl.yaml
+        fi
+
+        if [ "${{ inputs.proxy_request_cpu }}" != '' ]; then
+          sed -i "s|##REQUEST_CPU##|${{ inputs.proxy_request_cpu }}|g" .k8s/deployment_proxy.tpl.yaml
+        fi
+
+        if [ "${{ inputs.proxy_request_memory }}" != '' ]; then
+          sed -i "s|##REQUEST_MEMORY##|${{ inputs.proxy_request_memory }}|g" .k8s/deployment_proxy.tpl.yaml
+        fi
+
+        kubectl apply -f .k8s --force
+      env:
+        KUBECONFIG: kube_config
