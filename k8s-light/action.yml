@@ -96,7 +96,7 @@ runs:
       run: echo "RELEASE=${{ inputs.release_version || steps.latest-tag.outputs.tag }}" >> $GITHUB_ENV
 
     - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1-node16
+      uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-access-key-id: ${{ inputs.aws_access_key_id }}
         aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
