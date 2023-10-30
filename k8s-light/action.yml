@@ -102,7 +102,7 @@ runs:
         rm affinity.yaml
         rm tolerations.yaml
           if [ -n "$(find .k8s -name 'cronjob-*.tpl.yaml' | head -1)" ]; then
-              echo '            affinity:
+              echo '           affinity:
                       nodeAffinity:
                           requiredDuringSchedulingIgnoredDuringExecution:
                             nodeSelectorTerms:
@@ -118,9 +118,9 @@ runs:
                         value: ng02' > tolerations.yaml
               sed -i '/##AFFINITY##/r affinity.yaml' .k8s/cronjob-*.tpl.yaml
               sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/cronjob-*.tpl.yaml
-              cat .k8s/cronjob-sync-base-simpar.tpl.yaml
               sed -i "s|##AFFINITY##||g" .k8s/cronjob-*.tpl.yaml
               sed -i "s|##TOLERATION##||g" .k8s/cronjob-*.tpl.yaml
+             cat .k8s/cronjob-sync-base-simpar.tpl.yaml
              rm affinity.yaml
              rm tolerations.yaml
           fi
