@@ -111,7 +111,7 @@ runs:
                               operator: In
                               values:
                               - ng02' > affinity.yaml
-              echo '           tolerations:
+              echo '          tolerations:
                    - effect: NoSchedule
                      key: nodegroup
                      operator: Equal
