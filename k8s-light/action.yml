@@ -116,9 +116,9 @@ runs:
                         key: nodegroup
                         operator: Equal
                         value: ng02' > tolerations.yaml
-              cat .k8s/cronjob-sync-base-simpar.tpl.yaml
               sed -i '/##AFFINITY##/r affinity.yaml' .k8s/cronjob-*.tpl.yaml
               sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/cronjob-*.tpl.yaml
+              cat .k8s/cronjob-sync-base-simpar.tpl.yaml
               sed -i "s|##AFFINITY##||g" .k8s/cronjob-*.tpl.yaml
               sed -i "s|##TOLERATION##||g" .k8s/cronjob-*.tpl.yaml
              rm affinity.yaml
