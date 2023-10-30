@@ -2,9 +2,6 @@ name: K8s
 description: Run deploy for kubernetes
 
 inputs:
-  ecr_repository:
-    description: Key for repository on k8s
-    required: true
   k8s_credential:
     description: Credential for k8s project
     required: true
@@ -14,18 +11,6 @@ inputs:
   service_async_base_url:
     description: URL async for k8s project
     required: false
-  github_token:
-    description: Token for Github project
-    required: true
-  aws_access_key_id:
-    description: AWS access key
-    required: true
-  aws_secret_access_key:
-    description: AWS secret key
-    required: true
-  tls_secret_name:
-    description: TLS secret name
-    required: true
   k8s_replicas:
     description: Number of replicas
     required: false
@@ -35,9 +20,6 @@ inputs:
     required: false
   certificate_arn:
     description: Certificate arn
-    required: false
-  release_version:
-    description: Release version
     required: false
   need_affinity:
     description: Need affinity
@@ -66,14 +48,8 @@ inputs:
   worker_request_memory:
     description: Request memory for worker
     required: false
-  scormcloud_appid:
-    description: scormcloud appid
-    required: false
-  scormcloud_secret_key:
-    description: scormcloud secret key
-    required: false
-  scormcloud_token_postback:
-    description: scorm cloud token postback
+  image_deploy:
+    description: Image of deploy
     required: false
 
 runs:
@@ -85,36 +61,11 @@ runs:
       with:
         fetch-depth: 0
 
-    - name: Set release version
-      shell: bash
-      run: echo "RELEASE=${{ inputs.release_version || steps.latest-tag.outputs.tag }}" >> $GITHUB_ENV
-
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        aws-access-key-id: ${{ inputs.aws_access_key_id }}
-        aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
-        aws-region: us-east-1
-
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
-
     - name: Set timestamp
       shell: bash
       run: |
         TIMESTAMP=$(date +%s)
         echo "TIMESTAMP=${TIMESTAMP}" >> $GITHUB_ENV
-
-    - name: Build and push image
-      shell: bash
-      env:
-        SCORMCLOUD_APPID: ${{ inputs.scormcloud_appid }}
-        SCORMCLOUD_SECRET_KEY: ${{ inputs.scormcloud_secret_key }}
-        SCORMCLOUD_TOKEN_POSTBACK: ${{ inputs.scormcloud_token_postback}}}
-      run: |
-        docker build --build-arg GITHUB_TOKEN=${{ inputs.github_token }} -t ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE .
-        docker push ${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE
 
     - name: Set k8s credentials
       shell: bash
@@ -124,7 +75,7 @@ runs:
       shell: bash
       run: |-
         sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/deployment_web.tpl.yaml
-        sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/deployment_web.tpl.yaml
+        sed -i "s|##IMAGE##|${{ inputs.image_deploy}}|g" .k8s/deployment_web.tpl.yaml
         sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/deployment_web.tpl.yaml
         sed -i "s|##APP_URL##|${{ inputs.service_base_url }}|g" .k8s/nginx-ingress.tpl.yaml
         sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g" .k8s/nginx-ingress.tpl.yaml
@@ -161,7 +112,7 @@ runs:
         fi
 
         if [ -n "$(find .k8s -name '*.cronjob.yaml' | head -1)" ]; then
-          sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/*.cronjob.yaml
+          sed -i "s|##IMAGE##${{ inputs.image_deploy}}|g" .k8s/*.cronjob.yaml
         fi
 
         if [ -n "$(find .k8s -name 'worker-nginx-ingress.tpl.yaml' | head -1)" ]; then
@@ -173,7 +124,7 @@ runs:
 
         if [ -n "$(find .k8s -name 'worker-deployment.tpl.yaml' | head -1)" ]; then
             sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/worker-deployment.tpl.yaml
-            sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/worker-deployment.tpl.yaml
+            sed -i "s|##IMAGE##|${{inputs.image_deploy}}:$RELEASE|g" .k8s/worker-deployment.tpl.yaml
             sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/worker-deployment.tpl.yaml
         fi
 
@@ -186,7 +137,7 @@ runs:
 
         if [ -n "$(find .k8s -name 'deployment_proxy.tpl.yaml' | head -1)" ]; then
             sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/deployment_proxy.tpl.yaml
-            sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/deployment_proxy.tpl.yaml
+            sed -i "s|##IMAGE##|${{ inputs.image_deploy}}g" .k8s/deployment_proxy.tpl.yaml
         fi
 
         if [ "${{ inputs.limit_cpu }}" != '' ]; then
