@@ -104,6 +104,7 @@ runs:
               sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/cronjob-*.tpl.yaml
               sed -i "s|##AFFINITY##||g" .k8s/cronjob-*.tpl.yaml
               sed -i "s|##TOLERATION##||g" .k8s/cronjob-*.tpl.yaml
+              echo .k8s/cronjob-*.tpl.yaml
           fi
         rm affinity.yaml
         rm tolerations.yaml
