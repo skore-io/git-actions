@@ -102,7 +102,7 @@ runs:
         rm affinity.yaml
         rm tolerations.yaml
           if [ -n "$(find .k8s -name 'cronjob-*.tpl.yaml' | head -1)" ]; then
-              echo '           affinity:
+              echo '          affinity:
                       nodeAffinity:
                           requiredDuringSchedulingIgnoredDuringExecution:
                             nodeSelectorTerms:
@@ -111,7 +111,7 @@ runs:
                                     operator: In
                                     values:
                                       - ng02' > affinity.yaml
-              echo '            tolerations:
+              echo '           tolerations:
                       - effect: NoSchedule
                         key: nodegroup
                         operator: Equal
