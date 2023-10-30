@@ -130,7 +130,7 @@ runs:
 
         if [ -n "$(find .k8s -name 'worker-deployment.tpl.yaml' | head -1)" ]; then
             sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/worker-deployment.tpl.yaml
-            sed -i "s|##IMAGE##|${{inputs.image_deploy}}:$RELEASE|g" .k8s/worker-deployment.tpl.yaml
+            sed -i "s|##IMAGE##|${{inputs.image_deploy}}|g" .k8s/worker-deployment.tpl.yaml
             sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/worker-deployment.tpl.yaml
         fi
 
