@@ -106,11 +106,11 @@ runs:
                     nodeAffinity:
                         requiredDuringSchedulingIgnoredDuringExecution:
                           nodeSelectorTerms:
-                            - matchExpressions:
-                                - key: nodegp
-                                  operator: In
-                                  values:
-                                    - ng02' > affinity.yaml
+                          - matchExpressions:
+                            - key: nodegp
+                              operator: In
+                              values:
+                              - ng02' > affinity.yaml
               echo '           tolerations:
                    - effect: NoSchedule
                      key: nodegroup
