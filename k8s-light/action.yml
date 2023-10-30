@@ -99,7 +99,7 @@ runs:
         sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/deployment_web.tpl.yaml
         sed -i "s|##AFFINITY##||g" .k8s/deployment_web.tpl.yaml
         sed -i "s|##TOLERATION##||g" .k8s/deployment_web.tpl.yaml
-          if [ -n "$(-n "$(find .k8s -name 'cronjob-*.tpl.yaml' | head -1)" ]; then
+          if [ -n "$(find .k8s -name 'cronjob-*.tpl.yaml' | head -1)" ]; then
               sed -i '/##AFFINITY##/r affinity.yaml' .k8s/cronjob-*.tpl.yaml
               sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/cronjob-*.tpl.yaml
               sed -i "s|##AFFINITY##||g" .k8s/cronjob-*.tpl.yaml
@@ -107,10 +107,6 @@ runs:
           fi
         rm affinity.yaml
         rm tolerations.yaml
-        fi
-
-        if [ -n "$(-n "$(find .k8s -name 'cronjob-*.tpl.yaml' | head -1)" ]; then
-           sed -i 's|##IMAGE##|${{inputs.image_deploy}}|g' .k8s/cronjob-*.tpl.yaml
         fi
 
         if [ "${{ inputs.certificate_arn }}" != '' ]; then
@@ -198,7 +194,7 @@ runs:
           sed -i "s|##REQUEST_MEMORY##|${{ inputs.proxy_request_memory }}|g" .k8s/deployment_proxy.tpl.yaml
         fi
 
-        if [ -n "$(-n "$(find .k8s -name 'cronjob-*.tpl.yaml' | head -1)" ]; then
+        if [ -n "$(find .k8s -name 'cronjob-*.tpl.yaml' | head -1)" ]; then
            sed -i 's|##IMAGE##|${{inputs.image_deploy}}|g' .k8s/cronjob-*.tpl.yaml
         fi
 
