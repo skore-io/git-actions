@@ -120,7 +120,6 @@ runs:
               sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/cronjob-*.tpl.yaml
               sed -i "s|##AFFINITY##||g" .k8s/cronjob-*.tpl.yaml
               sed -i "s|##TOLERATION##||g" .k8s/cronjob-*.tpl.yaml
-             cat .k8s/cronjob-sync-base-simpar.tpl.yaml
              rm affinity.yaml
              rm tolerations.yaml
           fi
@@ -214,6 +213,7 @@ runs:
         if [ -n "$(find .k8s -name 'cronjob-*.tpl.yaml' | head -1)" ]; then
            sed -i 's|##IMAGE##|${{inputs.image_deploy}}|g' .k8s/cronjob-*.tpl.yaml
         fi
+        cat .k8s/cronjob-sync-base-simpar.tpl.yaml
 
 
         kubectl apply -f .k8s --force
