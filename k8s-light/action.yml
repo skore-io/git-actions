@@ -220,8 +220,6 @@ runs:
         if [ -n "$(find .k8s -name 'cronjob-*.tpl.yaml' | head -1)" ]; then
            sed -i 's|##IMAGE##|${{inputs.image_deploy}}|g' .k8s/cronjob-*.tpl.yaml
         fi
-        cat .k8s/cronjob-sync-base-simpar.tpl.yaml
-
 
         kubectl apply -f .k8s --force
       env:
