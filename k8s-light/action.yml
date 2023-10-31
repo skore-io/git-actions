@@ -51,6 +51,9 @@ inputs:
   image_deploy:
     description: Image of deploy
     required: false
+  deployment_env:
+    description: Deployment env
+    required: false
 
 runs:
   using: composite
@@ -208,6 +211,10 @@ runs:
 
         if [ "${{ inputs.proxy_request_memory }}" != '' ]; then
           sed -i "s|##REQUEST_MEMORY##|${{ inputs.proxy_request_memory }}|g" .k8s/deployment_proxy.tpl.yaml
+        fi
+
+        if [ "${{ inputs.deployment_env }}" != '' ]; then
+          sed -i "s|##ENV##|${{ inputs.deployment_env }}|g" .k8s/worker-deployment.tpl.yaml
         fi
 
         if [ -n "$(find .k8s -name 'cronjob-*.tpl.yaml' | head -1)" ]; then
