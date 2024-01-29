@@ -72,12 +72,12 @@ runs:
 
   steps:
     - name: Checkout repo
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
     - name: Application cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ./node_modules
@@ -96,7 +96,7 @@ runs:
       run: echo "RELEASE=${{ inputs.release_version || steps.latest-tag.outputs.tag }}" >> $GITHUB_ENV
 
     - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1-node16
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ inputs.aws_access_key_id }}
         aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
@@ -174,28 +174,27 @@ runs:
         fi
 
         if [ -n "$(find .k8s -name 'worker-nginx-ingress.tpl.yaml' | head -1)" ]; then
-            sed -i "s|##APP_URL##|${{ inputs.service_async_base_url }}|g" .k8s/worker-nginx-ingress.tpl.yaml
-            sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g"  .k8s/worker-nginx-ingress.tpl.yaml
-            sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/worker-nginx-ingress.tpl.yaml
-            sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/worker-nginx-ingress.tpl.yaml  
+          sed -i "s|##APP_URL##|${{ inputs.service_async_base_url }}|g" .k8s/worker-nginx-ingress.tpl.yaml
+          sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g"  .k8s/worker-nginx-ingress.tpl.yaml
+          sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/worker-nginx-ingress.tpl.yaml
+          sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/worker-nginx-ingress.tpl.yaml
         fi
 
         if [ -n "$(find .k8s -name 'worker-deployment.tpl.yaml' | head -1)" ]; then
-            sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/worker-deployment.tpl.yaml
-            sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/worker-deployment.tpl.yaml
-            sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/worker-deployment.tpl.yaml
+          sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/worker-deployment.tpl.yaml
+          sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/worker-deployment.tpl.yaml
+          sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/worker-deployment.tpl.yaml
         fi
 
-
         if [ -n "$(find .k8s -name 'console-ingress.tpl.yaml' | head -1)" ]; then
-            sed -i "s|##APP_CONSOLE_URL##|${{ inputs.service_console_base_url }}|g" .k8s/console-ingress.tpl.yaml
-            sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/console-ingress.tpl.yaml
-            sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/console-ingress.tpl.yaml  
+          sed -i "s|##APP_CONSOLE_URL##|${{ inputs.service_console_base_url }}|g" .k8s/console-ingress.tpl.yaml
+          sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/console-ingress.tpl.yaml
+          sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/console-ingress.tpl.yaml
         fi
 
         if [ -n "$(find .k8s -name 'deployment_proxy.tpl.yaml' | head -1)" ]; then
-            sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/deployment_proxy.tpl.yaml
-            sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/deployment_proxy.tpl.yaml
+          sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/deployment_proxy.tpl.yaml
+          sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/deployment_proxy.tpl.yaml
         fi
 
         if [ "${{ inputs.limit_cpu }}" != '' ]; then
