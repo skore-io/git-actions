@@ -28,7 +28,7 @@ runs:
         java-version: '11.x'
 
     - name: Setup sonar-scanner
-      uses: warchant/setup-sonar-scanner@v4
+      uses: warchant/setup-sonar-scanner@v7
 
     - name: Test coverage cache
       uses: actions/cache@v4
