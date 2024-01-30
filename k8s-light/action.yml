@@ -84,48 +84,47 @@ runs:
         sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g" .k8s/nginx-ingress.tpl.yaml
 
         if [ "${{ inputs.need_affinity }}" == 'true' ]; then
-          echo '      affinity:
-                        nodeAffinity:
-                            requiredDuringSchedulingIgnoredDuringExecution:
-                              nodeSelectorTerms:
-                                - matchExpressions:
-                                    - key: nodegp
-                                      operator: In
-                                      values:
-                                        - ng02' > affinity.yaml
-          echo '      tolerations:
-                        - effect: NoSchedule
-                          key: nodegroup
-                          operator: Equal
-                          value: ng02' > tolerations.yaml
-          sed -i '/##AFFINITY##/r affinity.yaml' .k8s/deployment_web.tpl.yaml
-          sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/deployment_web.tpl.yaml
-          sed -i "s|##AFFINITY##||g" .k8s/deployment_web.tpl.yaml
-          sed -i "s|##TOLERATION##||g" .k8s/deployment_web.tpl.yaml
-          rm affinity.yaml
-          rm tolerations.yaml
-
+        echo '      affinity:
+                      nodeAffinity:
+                          requiredDuringSchedulingIgnoredDuringExecution:
+                            nodeSelectorTerms:
+                              - matchExpressions:
+                                  - key: nodegp
+                                    operator: In
+                                    values:
+                                      - ng02' > affinity.yaml
+        echo '      tolerations:
+                      - effect: NoSchedule
+                        key: nodegroup
+                        operator: Equal
+                        value: ng02' > tolerations.yaml
+        sed -i '/##AFFINITY##/r affinity.yaml' .k8s/deployment_web.tpl.yaml
+        sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/deployment_web.tpl.yaml
+        sed -i "s|##AFFINITY##||g" .k8s/deployment_web.tpl.yaml
+        sed -i "s|##TOLERATION##||g" .k8s/deployment_web.tpl.yaml
+        rm affinity.yaml
+        rm tolerations.yaml
           if [ -n "$(find .k8s -name 'cronjob-*.tpl.yaml' | head -1)" ]; then
-            echo '          affinity:
-                  nodeAffinity:
-                      requiredDuringSchedulingIgnoredDuringExecution:
-                        nodeSelectorTerms:
-                        - matchExpressions:
-                          - key: nodegp
-                            operator: In
-                            values:
-                            - ng02' > affinity.yaml
-            echo '          tolerations:
-                  - effect: NoSchedule
-                    key: nodegroup
-                    operator: Equal
-                    value: ng02' > tolerations.yaml
-            sed -i '/##AFFINITY##/r affinity.yaml' .k8s/cronjob-*.tpl.yaml
-            sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/cronjob-*.tpl.yaml
-            sed -i "s|##AFFINITY##||g" .k8s/cronjob-*.tpl.yaml
-            sed -i "s|##TOLERATION##||g" .k8s/cronjob-*.tpl.yaml
-            rm affinity.yaml
-            rm tolerations.yaml
+              echo '          affinity:
+                    nodeAffinity:
+                        requiredDuringSchedulingIgnoredDuringExecution:
+                          nodeSelectorTerms:
+                          - matchExpressions:
+                            - key: nodegp
+                              operator: In
+                              values:
+                              - ng02' > affinity.yaml
+              echo '          tolerations:
+                   - effect: NoSchedule
+                     key: nodegroup
+                     operator: Equal
+                     value: ng02' > tolerations.yaml
+              sed -i '/##AFFINITY##/r affinity.yaml' .k8s/cronjob-*.tpl.yaml
+              sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/cronjob-*.tpl.yaml
+              sed -i "s|##AFFINITY##||g" .k8s/cronjob-*.tpl.yaml
+              sed -i "s|##TOLERATION##||g" .k8s/cronjob-*.tpl.yaml
+             rm affinity.yaml
+             rm tolerations.yaml
           fi
         fi
 
@@ -142,27 +141,28 @@ runs:
         fi
 
         if [ -n "$(find .k8s -name 'worker-nginx-ingress.tpl.yaml' | head -1)" ]; then
-          sed -i "s|##APP_URL##|${{ inputs.service_async_base_url }}|g" .k8s/worker-nginx-ingress.tpl.yaml
-          sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g"  .k8s/worker-nginx-ingress.tpl.yaml
-          sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/worker-nginx-ingress.tpl.yaml
-          sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/worker-nginx-ingress.tpl.yaml
+            sed -i "s|##APP_URL##|${{ inputs.service_async_base_url }}|g" .k8s/worker-nginx-ingress.tpl.yaml
+            sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g"  .k8s/worker-nginx-ingress.tpl.yaml
+            sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/worker-nginx-ingress.tpl.yaml
+            sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/worker-nginx-ingress.tpl.yaml
         fi
 
         if [ -n "$(find .k8s -name 'worker-deployment.tpl.yaml' | head -1)" ]; then
-          sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/worker-deployment.tpl.yaml
-          sed -i "s|##IMAGE##|${{inputs.image_deploy}}|g" .k8s/worker-deployment.tpl.yaml
-          sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/worker-deployment.tpl.yaml
+            sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/worker-deployment.tpl.yaml
+            sed -i "s|##IMAGE##|${{inputs.image_deploy}}|g" .k8s/worker-deployment.tpl.yaml
+            sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/worker-deployment.tpl.yaml
         fi
 
+
         if [ -n "$(find .k8s -name 'console-ingress.tpl.yaml' | head -1)" ]; then
-          sed -i "s|##APP_CONSOLE_URL##|${{ inputs.service_console_base_url }}|g" .k8s/console-ingress.tpl.yaml
-          sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/console-ingress.tpl.yaml
-          sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/console-ingress.tpl.yaml
+            sed -i "s|##APP_CONSOLE_URL##|${{ inputs.service_console_base_url }}|g" .k8s/console-ingress.tpl.yaml
+            sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/console-ingress.tpl.yaml
+            sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/console-ingress.tpl.yaml
         fi
 
         if [ -n "$(find .k8s -name 'deployment_proxy.tpl.yaml' | head -1)" ]; then
-          sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/deployment_proxy.tpl.yaml
-          sed -i "s|##IMAGE##|${{ inputs.image_deploy}}g" .k8s/deployment_proxy.tpl.yaml
+            sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/deployment_proxy.tpl.yaml
+            sed -i "s|##IMAGE##|${{ inputs.image_deploy}}g" .k8s/deployment_proxy.tpl.yaml
         fi
 
         if [ "${{ inputs.limit_cpu }}" != '' ]; then
@@ -218,7 +218,7 @@ runs:
         fi
 
         if [ -n "$(find .k8s -name 'cronjob-*.tpl.yaml' | head -1)" ]; then
-          sed -i 's|##IMAGE##|${{inputs.image_deploy}}|g' .k8s/cronjob-*.tpl.yaml
+           sed -i 's|##IMAGE##|${{inputs.image_deploy}}|g' .k8s/cronjob-*.tpl.yaml
         fi
 
         kubectl apply -f .k8s --force
