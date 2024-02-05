@@ -132,9 +132,9 @@ runs:
     - name: Deploy application
       shell: bash
       run: |-
-        sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/deployment_web.tpl.yaml
-        sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/deployment_web.tpl.yaml
-        sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/deployment_web.tpl.yaml
+        sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/deployment_*.yaml
+        sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/deployment_*.yaml
+        sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/deployment_*.yaml
         sed -i "s|##APP_URL##|${{ inputs.service_base_url }}|g" .k8s/nginx-ingress.tpl.yaml
         sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g" .k8s/nginx-ingress.tpl.yaml
 
@@ -153,10 +153,10 @@ runs:
                         key: nodegroup
                         operator: Equal
                         value: ng02' > tolerations.yaml
-        sed -i '/##AFFINITY##/r affinity.yaml' .k8s/deployment_web.tpl.yaml
-        sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/deployment_web.tpl.yaml
-        sed -i "s|##AFFINITY##||g" .k8s/deployment_web.tpl.yaml
-        sed -i "s|##TOLERATION##||g" .k8s/deployment_web.tpl.yaml
+        sed -i '/##AFFINITY##/r affinity.yaml' .k8s/deployment_*.yaml
+        sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/deployment_*.yaml
+        sed -i "s|##AFFINITY##||g" .k8s/deployment_*.yaml
+        sed -i "s|##TOLERATION##||g" .k8s/deployment_*.yaml
         rm affinity.yaml
         rm tolerations.yaml
         fi
@@ -199,19 +199,19 @@ runs:
         fi
 
         if [ "${{ inputs.limit_cpu }}" != '' ]; then
-          sed -i "s|##LIMIT_CPU##|${{ inputs.limit_cpu }}|g" .k8s/deployment_web.tpl.yaml
+          sed -i "s|##LIMIT_CPU##|${{ inputs.limit_cpu }}|g" .k8s/deployment_*.yaml
         fi
 
         if [ "${{ inputs.limit_memory }}" != '' ]; then
-          sed -i "s|##LIMIT_MEMORY##|${{ inputs.limit_memory }}|g" .k8s/deployment_web.tpl.yaml
+          sed -i "s|##LIMIT_MEMORY##|${{ inputs.limit_memory }}|g" .k8s/deployment_*.yaml
         fi
 
         if [ "${{ inputs.request_cpu }}" != '' ]; then
-          sed -i "s|##REQUEST_CPU##|${{ inputs.request_cpu }}|g" .k8s/deployment_web.tpl.yaml
+          sed -i "s|##REQUEST_CPU##|${{ inputs.request_cpu }}|g" .k8s/deployment_*.yaml
         fi
 
         if [ "${{ inputs.request_memory }}" != '' ]; then
-          sed -i "s|##REQUEST_MEMORY##|${{ inputs.request_memory }}|g" .k8s/deployment_web.tpl.yaml
+          sed -i "s|##REQUEST_MEMORY##|${{ inputs.request_memory }}|g" .k8s/deployment_*.yaml
         fi
 
         if [ "${{ inputs.worker_limit_cpu }}" != '' ]; then
