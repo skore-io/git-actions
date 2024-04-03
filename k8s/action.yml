@@ -245,6 +245,11 @@ runs:
           sed -i "s|##REQUEST_MEMORY##|${{ inputs.proxy_request_memory }}|g" .k8s/deployment_proxy.tpl.yaml
         fi
 
+
+        if [ "${{ inputs.deployment_env }}" != '' ]; then
+          sed -i "s|##ENV##|${{ inputs.deployment_env }}|g" .k8s/*deployment*.tpl.yaml
+        fi
+
         kubectl apply -f .k8s --force
       env:
         KUBECONFIG: kube_config
