@@ -98,10 +98,10 @@ runs:
                         key: nodegroup
                         operator: Equal
                         value: ng02' > tolerations.yaml
-        sed -i '/##AFFINITY##/r affinity.yaml' .k8s/deployment_*.yaml
-        sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/deployment_*.yaml
-        sed -i "s|##AFFINITY##||g" .k8s/deployment_*.yaml
-        sed -i "s|##TOLERATION##||g" .k8s/deployment_*.yaml
+        sed -i '/##AFFINITY##/r affinity.yaml' .k8s/*deployment*.yaml
+        sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/*deployment*.yaml
+        sed -i "s|##AFFINITY##||g" .k8s/*deployment*.yaml
+        sed -i "s|##TOLERATION##||g" .k8s/*deployment*.yaml
         rm affinity.yaml
         rm tolerations.yaml
           if [ -n "$(find .k8s -name 'cronjob-*.tpl.yaml' | head -1)" ]; then
