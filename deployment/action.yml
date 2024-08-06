@@ -1,0 +1,80 @@
+name: Deployment
+description: GitHub deployment
+
+inputs:
+  environment:
+    description: Target environment
+    required: true
+    default: staging
+  github_token:
+    description: Token for GitHub project
+    required: true
+  branch_ref:
+    description: Target branch
+    required: true
+    default: homolog
+
+runs:
+  using: composite
+
+  steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Validate environment input
+      shell: bash
+      run: |
+        valid_environments=("staging" "production")
+        if [[ ! " ${valid_environments[@]} " =~ " ${{ inputs.environment }} " ]]; then
+          echo "Invalid environment: ${{ inputs.environment }}"
+          echo "Valid environments are: ${valid_environments[@]}"
+          exit 1
+        fi
+
+    - name: Validate branch_ref input
+      shell: bash
+      run: |
+        valid_branches=("homolog" "main")
+        if [[ ! " ${valid_branches[@]} " =~ " ${{ inputs.branch_ref }} " ]]; then
+          echo "Invalid branch: ${{ inputs.branch_ref }}"
+          echo "Valid branches are: ${valid_branches[@]}"
+          exit 1
+        fi
+
+    - name: Create GitHub deployment
+      id: create_deployment
+      shell: bash
+      run: |
+        # Criar o payload JSON corretamente formatado
+        json_payload=$(jq -n --arg ref "${{ inputs.branch_ref }}" --arg environment "${{ inputs.environment }}" '{
+          ref: $ref,
+          environment: $environment,
+          required_contexts: []
+        }')
+
+        response=$(curl -s -X POST \
+          -H "Authorization: token ${{ inputs.github_token }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/${{ github.repository }}/deployments \
+          -d "$json_payload")
+
+        echo "API Response: $response"
+
+        deployment_id=$(echo $response | jq -r '.id')
+        echo "Deployment ID: $deployment_id"
+        echo "deployment_id=$deployment_id" >> $GITHUB_ENV
+
+    - name: Set deployment status to success
+      shell: bash
+      run: |
+        curl -X POST \
+          -H "Authorization: token ${{ inputs.github_token }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/${{ github.repository }}/deployments/${{ env.deployment_id }}/statuses \
+          -d '{
+            "state": "success",
+            "environment": "${{ inputs.environment }}",
+            "log_url": "https://github.com/${{ github.repository }}/actions"
+          }'
