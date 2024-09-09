@@ -66,6 +66,18 @@ inputs:
   worker_request_memory:
     description: Request memory for worker
     required: false
+  crawler_limit_cpu:
+    description: Limit cpu for crawler
+    required: false
+  crawler_limit_memory:
+    description: Limit memory for crawler
+    required: false
+  crawler_request_cpu:
+    description: Request cpu for crawler
+    required: false
+  crawler_request_memory:
+    description: Request memory for crawler
+    required: false
 
 runs:
   using: composite
@@ -186,6 +198,19 @@ runs:
           sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/worker-deployment.tpl.yaml
         fi
 
+        if [ -n "$(find .k8s -name 'crawler-nginx-ingress.tpl.yaml' | head -1)" ]; then
+          sed -i "s|##APP_URL##|${{ inputs.service_async_base_url }}|g" .k8s/crawler-nginx-ingress.tpl.yaml
+          sed -i "s|##TLS_SECRET_NAME##|${{ inputs.tls_secret_name }}|g"  .k8s/crawler-nginx-ingress.tpl.yaml
+          sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/crawler-nginx-ingress.tpl.yaml
+          sed -i "s|##CERTIFICATE-ARN##|${{ inputs.certificate_arn }}|g" .k8s/crawler-nginx-ingress.tpl.yaml
+        fi
+
+        if [ -n "$(find .k8s -name 'crawler-deployment.tpl.yaml' | head -1)" ]; then
+          sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/crawler-deployment.tpl.yaml
+          sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/crawler-deployment.tpl.yaml
+          sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/crawler-deployment.tpl.yaml
+        fi
+
         if [ -n "$(find .k8s -name 'console-ingress.tpl.yaml' | head -1)" ]; then
           sed -i "s|##APP_CONSOLE_URL##|${{ inputs.service_console_base_url }}|g" .k8s/console-ingress.tpl.yaml
           sed -i "s|##SUBNET##|${{ inputs.subnets }}|g" .k8s/console-ingress.tpl.yaml
@@ -227,6 +252,22 @@ runs:
 
         if [ "${{ inputs.worker_request_memory }}" != '' ]; then
           sed -i "s|##REQUEST_MEMORY##|${{ inputs.worker_request_memory }}|g" .k8s/worker-deployment.tpl.yaml
+        fi
+
+        if [ "${{ inputs.crawler_limit_cpu }}" != '' ]; then
+          sed -i "s|##LIMIT_CPU##|${{ inputs.crawler_limit_cpu }}|g" .k8s/crawler-deployment.tpl.yaml
+        fi
+
+        if [ "${{ inputs.crawler_limit_memory }}" != '' ]; then
+          sed -i "s|##LIMIT_MEMORY##|${{ inputs.crawler_limit_memory }}|g" .k8s/crawler-deployment.tpl.yaml
+        fi
+
+        if [ "${{ inputs.crawler_request_cpu }}" != '' ]; then
+          sed -i "s|##REQUEST_CPU##|${{ inputs.crawler_request_cpu }}|g" .k8s/crawler-deployment.tpl.yaml
+        fi
+
+        if [ "${{ inputs.crawler_request_memory }}" != '' ]; then
+          sed -i "s|##REQUEST_MEMORY##|${{ inputs.crawler_request_memory }}|g" .k8s/crawler-deployment.tpl.yaml
         fi
 
         if [ "${{ inputs.proxy_limit_cpu }}" != '' ]; then
