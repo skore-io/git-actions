@@ -250,8 +250,10 @@ runs:
           sed -i "s|##ENV##|${{ inputs.deployment_env }}|g" .k8s/*deployment*.tpl.yaml
         fi
 
-        DEPLOY_FILES=$(find .k8s -type f ! -name 'crawler-deployment.tpl.yaml' ! -name 'crawler-service.yaml')
-
-        kubectl apply -f $DEPLOY_FILES --force
+        if [[ "${{ inputs.ecr_repository }}" == "mission" ]]; then
+          find .k8s -type f ! -name 'crawler-deployment.tpl.yaml' ! -name 'crawler-service.yaml' | xargs -I {} kubectl apply -f {} --force
+        else
+          kubectl apply -f .k8s --force
+        fi
       env:
         KUBECONFIG: kube_config
