@@ -250,6 +250,8 @@ runs:
           sed -i "s|##ENV##|${{ inputs.deployment_env }}|g" .k8s/*deployment*.tpl.yaml
         fi
 
-        kubectl apply -f .k8s --force
+        DEPLOY_FILES=$(find .k8s -type f ! -name 'crawler-deployment.tpl.yaml')
+
+        kubectl apply -f $DEPLOY_FILES --force
       env:
         KUBECONFIG: kube_config
