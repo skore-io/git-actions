@@ -21,8 +21,9 @@ on:
     - cron: '0 12 * * *' # Every day at 9am BRT
 
 jobs:
-  notify-open-prs:
+  notify_open_prs:
     runs-on: ubuntu-latest
+
     steps:
       - uses: skore-io/git-actions/open-pr-notifier@main
 ```
