@@ -44,7 +44,7 @@ runs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: pr.number,
-                  body: `⚠️ Esse PR tá aberto há 1 dia e ainda não recebeu nenhuma revisão. Que tal acionar seu time?`
+                  body: `⚠️ Esse PR tá aberto há 1 dia e ainda não recebeu nenhuma revisão. Que tal dar um ping na galera pra revisar?`
                 });
               }
             }
@@ -63,7 +63,7 @@ runs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `🟡 Esse PR tá aberto há 4 dias. Conquista desbloqueada: "PR lendário em modo espera" 🏅`
+                body: `⏳ Esse PR tá aberto há 4 dias. Que tal dar um gás nele?`
               });
             }
 
@@ -72,16 +72,27 @@ runs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `🚨 Esse PR tá por aqui há 5 dias. Tá tudo certo? Se tiver algo travando, o time pode dar uma força.`
+                body: `🚨 Esse PR tá por aqui há 5 dias. Tá tudo certo? Se tiver algo travando, o time pode dar uma força — tamo junto!`
               });
             }
 
-            if (daysOpen >= 7 && daysSinceUpdate >= 1) {
+            if (daysOpen === 7) {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `❌ Esse PR chegou a 7 dias aberto e ficou 1 dia sem atividade. Estamos fechando automaticamente.`
+                body: `⏰ 7 dias de PR! Você desbloqueou a conquista: "PR lendário em modo espera" 🏅
+
+                Se não houver atividade nas próximas 24h, ele será fechado automaticamente. Bora evitar isso?`
+              });
+            }
+
+            if (daysOpen > 7 && daysSinceUpdate >= 1) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: `Esse PR ficou aberto por ${daysOpen} dias e sem atualizações nas últimas 24h. Fechando automaticamente — se ainda for relevante, sinta-se à vontade pra reabrir.`
               });
 
               await github.rest.pulls.update({
