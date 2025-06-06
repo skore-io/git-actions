@@ -42,6 +42,9 @@ inputs:
   need_affinity:
     description: Need affinity
     required: false
+  nodegroup_name:
+    description: Nodegroup name for affinity/toleration
+    required: false
   limit_cpu:
     description: Limit cpu
     required: false
@@ -87,7 +90,7 @@ runs:
 
     - name: Get release version
       id: latest-tag
-      uses: 'WyriHaximus/github-action-get-previous-tag@v1'
+      uses: "WyriHaximus/github-action-get-previous-tag@v1"
       with:
         fallback: 1.0.0
 
@@ -147,12 +150,12 @@ runs:
                                   - key: nodegp
                                     operator: In
                                     values:
-                                      - ng02' > affinity.yaml
+                                      - ${{ inputs.nodegroup_name }}' > affinity.yaml
         echo '      tolerations:
                       - effect: NoSchedule
                         key: nodegroup
                         operator: Equal
-                        value: ng02' > tolerations.yaml
+                        value: ${{ inputs.nodegroup_name }}' > tolerations.yaml
         sed -i '/##AFFINITY##/r affinity.yaml' .k8s/deployment_*.yaml
         sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/deployment_*.yaml
         sed -i "s|##AFFINITY##||g" .k8s/deployment_*.yaml
