@@ -165,7 +165,7 @@ runs:
         sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/worker-deployment.tpl.yaml
         sed -i "s|##AFFINITY##||g" .k8s/worker-deployment.tpl.yaml
         sed -i "s|##TOLERATION##||g" .k8s/worker-deployment.tpl.yaml
-        
+
         rm affinity.yaml
         rm tolerations.yaml
         fi
