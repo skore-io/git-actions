@@ -11,6 +11,10 @@ runs:
         github-token: ${{ github.token }}
         script: |
           function getBusinessDays(startDate, endDate) {
+            if (startDate.getHours() >= 16) {
+              startDate.setDate(startDate.getDate() + 1);
+            }
+
             let count = 0;
             const curDate = new Date(startDate.getTime());
 
