@@ -10,6 +10,25 @@ runs:
       with:
         github-token: ${{ github.token }}
         script: |
+          function getBusinessDays(startDate, endDate) {
+            if (startDate.getHours() >= 16) {
+              startDate.setDate(startDate.getDate() + 1);
+            }
+
+            let count = 0;
+            const curDate = new Date(startDate.getTime());
+
+            while (curDate <= endDate) {
+              const dayOfWeek = curDate.getDay();
+
+              if (dayOfWeek !== 0 && dayOfWeek !== 6) count++;
+
+              curDate.setDate(curDate.getDate() + 1);
+            }
+
+            return count;
+          }
+
           const now = new Date();
 
           const { data: prs } = await github.rest.pulls.list({
@@ -23,12 +42,12 @@ runs:
             const createdAt = new Date(pr.created_at);
             const updatedAt = new Date(pr.updated_at);
 
-            const daysOpen = Math.floor((now - createdAt) / (1000 * 60 * 60 * 24));
-            const daysSinceUpdate = Math.floor((now - updatedAt) / (1000 * 60 * 60 * 24));
+            const daysOpen = getBusinessDays(createdAt, now);
+            const daysSinceUpdate = getBusinessDays(updatedAt, now);
 
-            console.info(`PR #${pr.number}: ${daysOpen} days open, ${daysSinceUpdate} days since update`);
+            console.info(`PR #${pr.number}: ${daysOpen} business days open, ${daysSinceUpdate} business days since update`);
 
-            if (daysOpen >= 1 && daysOpen < 3) {
+            if (daysOpen === 1) {
               const { data: reviews } = await github.rest.pulls.listReviews({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -44,9 +63,18 @@ runs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: pr.number,
-                  body: `⚠️ Esse PR tá aberto há ${daysOpen === 1 ? '1 dia' : `${daysOpen} dias`} e ainda não recebeu nenhuma revisão. Que tal dar um ping na galera pra revisar?`
+                  body: `⚠️ Esse PR tá aberto há 1 dia útil e ainda não recebeu nenhuma revisão. Que tal dar um ping na galera pra revisar?`
                 });
               }
+            }
+
+            if (daysOpen === 2) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: `📣 Esse PR tá aberto há 2 dias úteis. Tem algo travando ou já dá pra seguir com QA?`
+              });
             }
 
             if (daysOpen === 3) {
@@ -54,7 +82,7 @@ runs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `📣 Esse PR tá aberto há 3 dias. Tem algo travando ou já dá pra seguir com QA?`
+                body: `⏳ Esse PR tá aberto há 3 dias úteis. Que tal dar um gás nele?`
               });
             }
 
@@ -63,7 +91,7 @@ runs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `⏳ Esse PR tá aberto há 4 dias. Que tal dar um gás nele?`
+                body: `🚨 Esse PR tá por aqui há 4 dias úteis. Tá tudo certo? Se tiver algo travando, o time pode dar uma força — tamo junto!`
               });
             }
 
@@ -72,27 +100,18 @@ runs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `🚨 Esse PR tá por aqui há 5 dias. Tá tudo certo? Se tiver algo travando, o time pode dar uma força — tamo junto!`
-              });
-            }
-
-            if (daysOpen === 7) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pr.number,
-                body: `⏰ 7 dias de PR! Você desbloqueou a conquista: "PR lendário em modo espera" 🏅
+                body: `⏰ 5 dias úteis de PR! Você desbloqueou a conquista: "PR lendário em modo espera" 🏅
 
                 Se não houver atividade nas próximas 24h, ele será fechado automaticamente. Bora evitar isso?`
               });
             }
 
-            if (daysOpen > 7 && daysSinceUpdate >= 1) {
+            if (daysOpen > 5 && daysSinceUpdate >= 1) {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `Esse PR ficou aberto por ${daysOpen} dias e sem atualizações nas últimas 24h. Fechando automaticamente — se ainda for relevante, sinta-se à vontade pra reabrir.`
+                body: `Esse PR ficou aberto por ${daysOpen} dias úteis e sem atualizações nas últimas 24h. Fechando automaticamente — se ainda for relevante, sinta-se à vontade pra reabrir.`
               });
 
               await github.rest.pulls.update({
