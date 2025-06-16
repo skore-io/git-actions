@@ -47,7 +47,7 @@ runs:
 
             console.info(`PR #${pr.number}: ${daysOpen} business days open, ${daysSinceUpdate} business days since update`);
 
-            if (daysOpen >= 1 && daysOpen < 3) {
+            if (daysOpen === 1) {
               const { data: reviews } = await github.rest.pulls.listReviews({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -63,9 +63,18 @@ runs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: pr.number,
-                  body: `⚠️ Esse PR tá aberto há ${daysOpen === 1 ? '1 dia útil' : `${daysOpen} dias úteis`} e ainda não recebeu nenhuma revisão. Que tal dar um ping na galera pra revisar?`
+                  body: `⚠️ Esse PR tá aberto há 1 dia útil e ainda não recebeu nenhuma revisão. Que tal dar um ping na galera pra revisar?`
                 });
               }
+            }
+
+            if (daysOpen === 2) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: `📣 Esse PR tá aberto há 2 dias úteis. Tem algo travando ou já dá pra seguir com QA?`
+              });
             }
 
             if (daysOpen === 3) {
@@ -73,7 +82,7 @@ runs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `📣 Esse PR tá aberto há 3 dias úteis. Tem algo travando ou já dá pra seguir com QA?`
+                body: `⏳ Esse PR tá aberto há 3 dias úteis. Que tal dar um gás nele?`
               });
             }
 
@@ -82,7 +91,7 @@ runs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `⏳ Esse PR tá aberto há 4 dias úteis. Que tal dar um gás nele?`
+                body: `🚨 Esse PR tá por aqui há 4 dias úteis. Tá tudo certo? Se tiver algo travando, o time pode dar uma força — tamo junto!`
               });
             }
 
@@ -91,22 +100,13 @@ runs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `🚨 Esse PR tá por aqui há 5 dias úteis. Tá tudo certo? Se tiver algo travando, o time pode dar uma força — tamo junto!`
-              });
-            }
-
-            if (daysOpen === 7) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pr.number,
-                body: `⏰ 7 dias úteis de PR! Você desbloqueou a conquista: "PR lendário em modo espera" 🏅
+                body: `⏰ 5 dias úteis de PR! Você desbloqueou a conquista: "PR lendário em modo espera" 🏅
 
                 Se não houver atividade nas próximas 24h, ele será fechado automaticamente. Bora evitar isso?`
               });
             }
 
-            if (daysOpen > 7 && daysSinceUpdate >= 1) {
+            if (daysOpen > 5 && daysSinceUpdate >= 1) {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
