@@ -161,11 +161,6 @@ runs:
         sed -i "s|##AFFINITY##||g" .k8s/deployment_*.yaml
         sed -i "s|##TOLERATION##||g" .k8s/deployment_*.yaml
 
-        sed -i '/##AFFINITY##/r affinity.yaml' .k8s/worker-deployment.tpl.yaml
-        sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/worker-deployment.tpl.yaml
-        sed -i "s|##AFFINITY##||g" .k8s/worker-deployment.tpl.yaml
-        sed -i "s|##TOLERATION##||g" .k8s/worker-deployment.tpl.yaml
-
         rm affinity.yaml
         rm tolerations.yaml
         fi
@@ -193,6 +188,30 @@ runs:
           sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/worker-deployment.tpl.yaml
           sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/worker-deployment.tpl.yaml
           sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/worker-deployment.tpl.yaml
+          
+        if [ "${{ inputs.need_affinity }}" == 'true' ]; then
+        echo '      affinity:
+                      nodeAffinity:
+                          requiredDuringSchedulingIgnoredDuringExecution:
+                            nodeSelectorTerms:
+                              - matchExpressions:
+                                  - key: nodegp
+                                    operator: In
+                                    values:
+                                      - ${{ inputs.nodegroup_name }}' > affinity.yaml
+        echo '      tolerations:
+                      - effect: NoSchedule
+                        key: nodegroup
+                        operator: Equal
+                        value: ${{ inputs.nodegroup_name }}' > tolerations.yaml
+
+        sed -i '/##AFFINITY##/r affinity.yaml' .k8s/worker-deployment.tpl.yaml
+        sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/worker-deployment.tpl.yaml
+        sed -i "s|##AFFINITY##||g" .k8s/worker-deployment.tpl.yaml
+        sed -i "s|##TOLERATION##||g" .k8s/worker-deployment.tpl.yaml
+        
+        rm affinity.yaml
+        rm tolerations.yaml                
         fi
 
         if [ -n "$(find .k8s -name 'console-ingress.tpl.yaml' | head -1)" ]; then
