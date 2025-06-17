@@ -10,15 +10,16 @@ runs:
       with:
         github-token: ${{ github.token }}
         script: |
-          function getBusinessDays(startDate, endDate) {
+          function getBusinessDays(startDate) {
             if (startDate.getHours() >= 16) {
               startDate.setDate(startDate.getDate() + 1);
             }
 
             let count = 0;
-            const curDate = new Date(startDate.getTime());
+            const now = new Date().setHours(0, 0, 0, 0);
+            const curDate = startDate.setHours(0, 0, 0, 0);
 
-            while (curDate <= endDate) {
+            while (curDate < now) {
               const dayOfWeek = curDate.getDay();
 
               if (dayOfWeek !== 0 && dayOfWeek !== 6) count++;
@@ -28,8 +29,6 @@ runs:
 
             return count;
           }
-
-          const now = new Date();
 
           const { data: prs } = await github.rest.pulls.list({
             owner: context.repo.owner,
@@ -42,8 +41,8 @@ runs:
             const createdAt = new Date(pr.created_at);
             const updatedAt = new Date(pr.updated_at);
 
-            const daysOpen = getBusinessDays(createdAt, now);
-            const daysSinceUpdate = getBusinessDays(updatedAt, now);
+            const daysOpen = getBusinessDays(createdAt);
+            const daysSinceUpdate = getBusinessDays(updatedAt);
 
             console.info(`PR #${pr.number}: ${daysOpen} business days open, ${daysSinceUpdate} business days since update`);
 
