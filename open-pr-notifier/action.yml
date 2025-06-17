@@ -16,8 +16,11 @@ runs:
             }
 
             let count = 0;
-            const now = new Date().setHours(0, 0, 0, 0);
-            const curDate = startDate.setHours(0, 0, 0, 0);
+            const now = new Date();
+            const curDate = startDate;
+
+            now.setHours(0, 0, 0, 0);
+            curDate.setHours(0, 0, 0, 0);
 
             while (curDate < now) {
               const dayOfWeek = curDate.getDay();
