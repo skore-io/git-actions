@@ -33,6 +33,9 @@ runs:
             return count;
           }
 
+          const dayOfWeek = new Date().getDay();
+          if (dayOfWeek === 0 || dayOfWeek === 6) return;
+
           const { data: prs } = await github.rest.pulls.list({
             owner: context.repo.owner,
             repo: context.repo.repo,
