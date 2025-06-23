@@ -1,6 +1,6 @@
 # Open PR Notifier
 
-Esta action verifica PRs abertos e envia notificações automáticas baseadas no tempo que estão abertos. Ela também pode fechar automaticamente PRs que ficam muito tempo sem atividade.
+Esta action verifica PRs abertos e envia notificações automáticas baseadas no tempo que estão abertos. Ela também pode fechar automaticamente PRs que ficam muito tempo sem atividade. Ela atua apenas nos dias de semana, finais de semana são ignorados.
 
 ## Regras
 Veja abaixo uma tabela com as regras:
