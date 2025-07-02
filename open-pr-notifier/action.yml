@@ -87,7 +87,10 @@ runs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `⏳ Esse PR tá aberto há 3 dias úteis. Que tal dar um gás nele?`
+                body: `⏳ **3 dias úteis!**
+
+                Esse PR tá mais velho que aquele café que você esqueceu na mesa! ☕
+                Que tal dar um gás nele?`
               });
             }
 
@@ -96,7 +99,10 @@ runs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `🚨 Esse PR tá por aqui há 4 dias úteis. Tá tudo certo? Se tiver algo travando, o time pode dar uma força — tamo junto!`
+                body: `🚨 **4 dias úteis!**
+
+                Esse PR tá mais velho que aquele bug que virou feature! 😂
+                Tá tudo certo? Se tiver algo travando, o time pode dar uma força — tamo junto!`
               });
             }
 
@@ -105,9 +111,11 @@ runs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `⏰ 5 dias úteis de PR! Você desbloqueou a conquista: "PR lendário em modo espera" 🏅
+                body: `🏆 **5 dias úteis!**
 
-                Se não houver atividade nas próximas 24h, ele será fechado automaticamente. Bora evitar isso?`
+                Você desbloqueou a conquista: **"PR lendário em modo espera"** 🏅
+
+                ⚠️ Se não houver atividade nas próximas 24h, ele será fechado automaticamente. Bora evitar o SHAME? 🔔`
               });
             }
 
@@ -116,7 +124,17 @@ runs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `Esse PR ficou aberto por ${daysOpen} dias úteis e sem atualizações nas últimas 24h. Fechando automaticamente — se ainda for relevante, sinta-se à vontade pra reabrir.`
+                body: `🔔 **SHAME! SHAME! SHAME!**
+
+                ![SHAME](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMjhkdnBtYWI3bmZueTVlczEycjhlZTMxZ2g3YWsyb2YzNGZuamNweCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Ob7p7lDT99cd2/giphy.gif)
+
+                Esse PR ficou aberto por **${daysOpen} dias úteis** e sem atualizações nas últimas 24h!
+
+                🚨 **FECHANDO AUTOMATICAMENTE** 🚨
+
+                Se ainda for relevante, sinta-se à vontade pra reabrir. Mas lembre-se:
+
+                > *"PRs são como café - quando esfria, perde a graça"* - Barista do Git 😂
               });
 
               await github.rest.pulls.update({
