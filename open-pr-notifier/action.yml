@@ -135,7 +135,8 @@ runs:
                 Se ainda for relevante, sinta-se à vontade pra reabrir. Mas lembre-se:
 
                 > *"PRs são como café - quando esfria, perde a graça"* - Barista do Git 😂
-              `);
+              `
+              });
 
               await github.rest.pulls.update({
                 owner: context.repo.owner,
