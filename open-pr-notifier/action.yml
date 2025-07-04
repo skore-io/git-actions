@@ -68,7 +68,9 @@ runs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: pr.number,
-                  body: `⚠️ Esse PR tá aberto há 1 dia útil e ainda não recebeu nenhuma revisão. Que tal dar um ping na galera pra revisar?`
+                  body: `⚠️ **1 dia útil sem revisão!**
+
+                  Que tal dar um ping na galera pra revisar e tirar esse PR da fila? 🚀
                 });
               }
             }
@@ -78,7 +80,10 @@ runs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `📣 Esse PR tá aberto há 2 dias úteis. Tem algo travando ou já dá pra seguir com QA?`
+                body: `📢 **2 dias úteis!**
+
+                Tem algo travando ou já dá pra seguir com QA?
+                Se precisar de ajuda pra destravar, só avisar!`
               });
             }
 
@@ -89,8 +94,7 @@ runs:
                 issue_number: pr.number,
                 body: `⏳ **3 dias úteis!**
 
-                Esse PR tá mais velho que aquele café que você esqueceu na mesa! ☕
-                Que tal dar um gás nele?`
+                Esse PR já tá esperando faz tempo! Será que hoje ele sai? 👀
               });
             }
 
@@ -126,17 +130,15 @@ runs:
                 issue_number: pr.number,
                 body: `🔔 **SHAME! SHAME! SHAME!**
 
-                ![SHAME](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMjhkdnBtYWI3bmZueTVlczEycjhlZTMxZ2g3YWsyb2YzNGZuamNweCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Ob7p7lDT99cd2/giphy.gif)
+                https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMjhkdnBtYWI3bmZueTVlczEycjhlZTMxZ2g3YWsyb2YzNGZuamNweCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Ob7p7lDT99cd2/giphy.gif
 
                 Esse PR ficou aberto por **${daysOpen} dias úteis** e sem atualizações nas últimas 24h!
 
-                🚨 **FECHANDO AUTOMATICAMENTE** 🚨
+                🚨 FECHANDO AUTOMATICAMENTE 🚨
 
                 Se ainda for relevante, sinta-se à vontade pra reabrir. Mas lembre-se:
-
-                > *"PRs são como café - quando esfria, perde a graça"* - Barista do Git 😂
-              `
-              });
+                "PRs são como café - quando esfria, perde a graça" - Barista do Git 😂
+              `});
 
               await github.rest.pulls.update({
                 owner: context.repo.owner,
