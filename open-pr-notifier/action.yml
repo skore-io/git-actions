@@ -70,7 +70,7 @@ runs:
                   issue_number: pr.number,
                   body: `⚠️ **1 dia útil sem revisão!**
 
-                  Que tal dar um ping na galera pra revisar e tirar esse PR da fila? 🚀
+                  Que tal dar um ping na galera pra revisar e tirar esse PR da fila? 🚀`
                 });
               }
             }
@@ -94,7 +94,7 @@ runs:
                 issue_number: pr.number,
                 body: `⏳ **3 dias úteis!**
 
-                Esse PR já tá esperando faz tempo! Será que hoje ele sai? 👀
+                Esse PR já tá esperando faz tempo! Será que hoje ele sai? 👀`
               });
             }
 
