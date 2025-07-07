@@ -123,14 +123,14 @@ runs:
               });
             }
 
-            if (daysOpen > 5) {
+            if (daysOpen > 5 && daysSinceUpdate >= 1) {
               const body = [
                 '🔔 **SHAME! SHAME! SHAME!**',
                 '',
                 '![shame gif](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMjhkdnBtYWI3bmZueTVlczEycjhlZTMxZ2g3YWsyb2YzNGZuamNweCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Ob7p7lDT99cd2/giphy.gif)',
                 '',
                 '```',
-                `Esse PR ficou aberto por **${daysOpen} dias úteis** e sem atualizações nas últimas 24h!`,
+                `Esse PR ficou aberto por ${daysOpen} dias úteis e sem atualizações nas últimas 24h!`,
                 '',
                 '🚨 FECHANDO AUTOMATICAMENTE 🚨',
                 '',
