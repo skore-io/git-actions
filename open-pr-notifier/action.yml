@@ -117,28 +117,34 @@ runs:
                 issue_number: pr.number,
                 body: `🏆 **5 dias úteis!**
 
-                Você desbloqueou a conquista: **"PR lendário em modo espera"** 🏅
+                Você desbloqueou a conquista: "PR lendário em modo espera" 🏅
 
                 ⚠️ Se não houver atividade nas próximas 24h, ele será fechado automaticamente. Bora evitar o SHAME? 🔔`
               });
             }
 
-            if (daysOpen > 5 && daysSinceUpdate >= 1) {
+            if (daysOpen > 5) {
+              const body = [
+                '🔔 **SHAME! SHAME! SHAME!**',
+                '',
+                '![shame gif](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMjhkdnBtYWI3bmZueTVlczEycjhlZTMxZ2g3YWsyb2YzNGZuamNweCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Ob7p7lDT99cd2/giphy.gif)',
+                '',
+                '```',
+                `Esse PR ficou aberto por **${daysOpen} dias úteis** e sem atualizações nas últimas 24h!`,
+                '',
+                '🚨 FECHANDO AUTOMATICAMENTE 🚨',
+                '',
+                'Se ainda for relevante, sinta-se à vontade pra reabrir. Mas lembre-se:',
+                '"PRs são como café - quando esfria, perde a graça" - Barista do Git 😂',
+                '```'
+              ].join('\n');
+
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `🔔 **SHAME! SHAME! SHAME!**
-
-                https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMjhkdnBtYWI3bmZueTVlczEycjhlZTMxZ2g3YWsyb2YzNGZuamNweCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Ob7p7lDT99cd2/giphy.gif
-
-                Esse PR ficou aberto por **${daysOpen} dias úteis** e sem atualizações nas últimas 24h!
-
-                🚨 FECHANDO AUTOMATICAMENTE 🚨
-
-                Se ainda for relevante, sinta-se à vontade pra reabrir. Mas lembre-se:
-                "PRs são como café - quando esfria, perde a graça" - Barista do Git 😂
-              `});
+                body
+              });
 
               await github.rest.pulls.update({
                 owner: context.repo.owner,
