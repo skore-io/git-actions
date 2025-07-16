@@ -92,12 +92,12 @@ runs:
                                   - key: nodegp
                                     operator: In
                                     values:
-                                      - ng02' > affinity.yaml
+                                      - ${{ inputs.nodegroup_name }}' > affinity.yaml
         echo '      tolerations:
                       - effect: NoSchedule
                         key: nodegroup
                         operator: Equal
-                        value: ng02' > tolerations.yaml
+                        value: ${{ inputs.nodegroup_name }}' > tolerations.yaml
         sed -i '/##AFFINITY##/r affinity.yaml' .k8s/*deployment*.yaml
         sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/*deployment*.yaml
         sed -i "s|##AFFINITY##||g" .k8s/*deployment*.yaml
@@ -113,12 +113,12 @@ runs:
                             - key: nodegp
                               operator: In
                               values:
-                              - ng02' > affinity.yaml
+                              - ${{ inputs.nodegroup_name }}' > affinity.yaml
               echo '          tolerations:
                    - effect: NoSchedule
                      key: nodegroup
                      operator: Equal
-                     value: ng02' > tolerations.yaml
+                     value: ${{ inputs.nodegroup_name }}' > tolerations.yaml
               sed -i '/##AFFINITY##/r affinity.yaml' .k8s/cronjob-*.tpl.yaml
               sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/cronjob-*.tpl.yaml
               sed -i "s|##AFFINITY##||g" .k8s/cronjob-*.tpl.yaml
