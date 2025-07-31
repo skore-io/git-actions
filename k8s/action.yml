@@ -69,6 +69,21 @@ inputs:
   worker_request_memory:
     description: Request memory for worker
     required: false
+  proxy_limit_cpu:
+    description: Limit cpu for proxy
+    required: false
+  proxy_limit_memory:
+    description: Limit memory for proxy
+    required: false
+  proxy_request_cpu:
+    description: Request cpu for proxy
+    required: false
+  proxy_request_memory:
+    description: Request memory for proxy
+    required: false
+  deployment_env:
+    description: Deployment environment
+    required: false
 
 runs:
   using: composite
@@ -188,7 +203,7 @@ runs:
           sed -i "s|##TIMESTAMP##|'$TIMESTAMP'|g" .k8s/worker-deployment.tpl.yaml
           sed -i "s|##IMAGE##|${{ steps.login-ecr.outputs.registry }}/${{ inputs.ecr_repository }}:$RELEASE|g" .k8s/worker-deployment.tpl.yaml
           sed -i "s|##REPLICAS##|${{ inputs.k8s_replicas }}|g" .k8s/worker-deployment.tpl.yaml
-          
+
           if [ "${{ inputs.need_affinity }}" == 'true' ]; then
           echo '      affinity:
                         nodeAffinity:
@@ -204,12 +219,12 @@ runs:
                           key: nodegroup
                           operator: Equal
                           value: ${{ inputs.nodegroup_name }}' > tolerations.yaml
-  
+
           sed -i '/##AFFINITY##/r affinity.yaml' .k8s/worker-deployment.tpl.yaml
           sed -i '/##TOLERATION##/r tolerations.yaml' .k8s/worker-deployment.tpl.yaml
           sed -i "s|##AFFINITY##||g" .k8s/worker-deployment.tpl.yaml
           sed -i "s|##TOLERATION##||g" .k8s/worker-deployment.tpl.yaml
-          
+
           rm affinity.yaml
           rm tolerations.yaml
           fi
@@ -273,7 +288,6 @@ runs:
         if [ "${{ inputs.proxy_request_memory }}" != '' ]; then
           sed -i "s|##REQUEST_MEMORY##|${{ inputs.proxy_request_memory }}|g" .k8s/deployment_proxy.tpl.yaml
         fi
-
 
         if [ "${{ inputs.deployment_env }}" != '' ]; then
           sed -i "s|##ENV##|${{ inputs.deployment_env }}|g" .k8s/*deployment*.tpl.yaml
