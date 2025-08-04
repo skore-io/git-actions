@@ -277,19 +277,19 @@ runs:
         fi
 
         if [ "${{ inputs.proxy_limit_cpu }}" != '' ]; then
-          sed -i "s|##LIMIT_CPU##|${{ inputs.proxy_limit_cpu }}|g" .k8s/deployment_proxy.tpl.yaml
+          sed -i "s|##PROXY_LIMIT_CPU##|${{ inputs.proxy_limit_cpu }}|g" .k8s/deployment_proxy.tpl.yaml
         fi
 
         if [ "${{ inputs.proxy_limit_memory }}" != '' ]; then
-          sed -i "s|##LIMIT_MEMORY##|${{ inputs.proxy_limit_memory }}|g" .k8s/deployment_proxy.tpl.yaml
+          sed -i "s|##PROXY_LIMIT_MEMORY##|${{ inputs.proxy_limit_memory }}|g" .k8s/deployment_proxy.tpl.yaml
         fi
 
         if [ "${{ inputs.proxy_request_cpu }}" != '' ]; then
-          sed -i "s|##REQUEST_CPU##|${{ inputs.proxy_request_cpu }}|g" .k8s/deployment_proxy.tpl.yaml
+          sed -i "s|##PROXY_REQUEST_CPU##|${{ inputs.proxy_request_cpu }}|g" .k8s/deployment_proxy.tpl.yaml
         fi
 
         if [ "${{ inputs.proxy_request_memory }}" != '' ]; then
-          sed -i "s|##REQUEST_MEMORY##|${{ inputs.proxy_request_memory }}|g" .k8s/deployment_proxy.tpl.yaml
+          sed -i "s|##PROXY_REQUEST_MEMORY##|${{ inputs.proxy_request_memory }}|g" .k8s/deployment_proxy.tpl.yaml
         fi
 
         if [ "${{ inputs.deployment_env }}" != '' ]; then
