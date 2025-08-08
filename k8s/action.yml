@@ -108,6 +108,7 @@ runs:
 
     - name: Get release version
       id: latest-tag
+      if: ${{ !inputs.release_version }}
       uses: "WyriHaximus/github-action-get-previous-tag@v1"
       with:
         fallback: 1.0.0
